@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusWeather - Clima em Tempo Real</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Cores Futuristas e de Transição de Clima */
+            --primary: #00f2ff; /* Ciano Neon (Sol/Ameno) */
+            --secondary: #7000ff; /* Roxo Profundo (Chuva/Frio) */
+            --bg: #030305;
+            --card-bg: rgba(255, 255, 255, 0.05); /* Vidro mais transparente */
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text: #e0e0e0;
+            --btn-active-text: #000000;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent; /* Remove o highlight de toque no mobile */
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            overflow-x: hidden;
+            transition: background 1s ease;
+        }
+
+        /* Background dinâmico futurista */
+        .glass-bg {
+            position: fixed;
+            top: -10%; left: -10%;
+            width: 120%; height: 120%;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            z-index: -1;
+            transition: background 1s ease-in-out;
+        }
+
+        /* 🔍 ABA DE PESQUISA SUSPENSA (OCULTA POR PADRÃO) */
+        .search-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(15px);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 100px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .search-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .search-form {
+            width: 90%;
+            max-width: 450px;
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 16px;
+            border: 1px solid var(--primary);
+            box-shadow: 0 10px 40px rgba(0, 242, 255, 0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            animation: slideDown 0.4s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .search-input-wrapper {
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 14px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--glass-border);
+            color: white;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(0, 242, 255, 0.05);
+        }
+
+        .btn-search-action {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+        }
+
+        .btn-search-action:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 5px 20px rgba(0, 242, 255, 0.5);
+        }
+
+        .close-search {
+            position: absolute;
+            top: -20px; right: -20px;
+            font-size: 1.5rem;
+            color: var(--primary);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* 📱 O App Container (Vidro Fosco) */
+        .app-container {
+            width: 100%;
+            max-width: 450px;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            animation: fadeInUp 0.8s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            border-bottom: 1px dashed var(--glass-border);
+            padding-bottom: 15px;
+        }
+
+        .logo-date-wrapper {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo {
+            font-weight: 800;
+            letter-spacing: 2px;
+            font-size: 1.1rem;
+            font-family: 'Courier New', monospace; /* Vibe hacker/dev */
+        }
+
+        .logo span {
+            color: var(--primary);
+            text-shadow: 0 0 10px var(--primary);
+        }
+
+        /* O Efeito do Cursor Piscando no Logo */
+        .logo::after {
+            content: '_';
+            animation: blink 1.2s step-end infinite;
+            color: var(--primary);
+        }
+
+        @keyframes blink { from, to { opacity: 0; } 50% { opacity: 1; } }
+
+        .current-date {
+            opacity: 0.6;
+            font-size: 0.75rem;
+            margin-top: 3px;
+        }
+
+        /* Botão de Pesquisa (Abre a aba suspensa) */
+        #btnOpenSearch {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: 0.3s;
+        }
+
+        #btnOpenSearch:hover {
+            background: rgba(0, 242, 255, 0.1);
+            transform: scale(1.05);
+        }
+
+        /* Dados Principais do Clima (Onde a mágica do F5 acontecia) */
+        .weather-main {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .location {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .weather-icon {
+            font-size: 6rem;
+            margin: 15px 0;
+            display: inline-block;
+            transition: color 0.3s;
+            filter: drop-shadow(0 0 15px currentColor);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .temperature {
+            font-size: 3.5rem;
+            font-weight: 300;
+            margin-top: 10px;
+        }
+
+        /* A Frase Engraçada */
+        .funny-quote {
+            background: rgba(0,0,0,0.1);
+            border-left: 3px solid #fff;
+            padding: 10px 15px;
+            border-radius: 0 4px 4px 0;
+            margin-top: -10px;
+            font-size: 0.9rem;
+            font-weight: 300;
+            font-style: italic;
+            max-width: 380px;
+            margin-left: auto; margin-right: auto;
+        }
+
+        /* Grid de Detalhes Adicionais (Baseado na image_24.png) */
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 25px;
+            margin-bottom: 25px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            transition: 0.3s;
+        }
+
+        .detail-item:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+            background: rgba(255,255,255,0.03);
+        }
+
+        .detail-icon-full {
+            font-size: 1.5rem;
+            color: var(--primary);
+            width: 30px;
+            text-align: center;
+        }
+
+        .detail-info {
+            flex: 1;
+        }
+
+        .detail-label {
+            font-size: 0.75rem;
+            opacity: 0.6;
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        /* Seção de Índices (Baseado na image_24.png, com frases descontraídas) */
+        .indices-section {
+            margin-top: 30px;
+        }
+
+        .indices-section h3 {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+
+        .indices-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .index-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            text-align: left;
+        }
+
+        .index-icon-card {
+            font-size: 1.6rem;
+            color: var(--secondary);
+        }
+
+        .index-content h4 {
+            margin: 0 0 3px 0;
+            color: var(--text);
+            font-size: 0.95rem;
+        }
+
+        .index-content p {
+            margin: 0;
+            font-size: 0.8rem;
+            opacity: 0.8;
+            line-height: 1.4;
+        }
+
+        /* Rodapé de Carregamento */
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 0.7rem;
+            opacity: 0.5;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* 📱 Responsividade Mobile */
+        @media (max-width: 768px) {
+            .hero-section { padding: 2rem 1rem; }
+            .details-grid, .indices-grid { grid-template-columns: 1fr; gap: 10px; }
+            .weather-icon { font-size: 4.5rem; }
+            .temperature { font-size: 2.8rem; }
+            .app-container { padding: 16px; border-radius: 16px; }
+            .detail-item, .index-card { padding: 12px; }
+            .search-overlay { padding-top: 60px; }
+            .btn-search-action { padding: 12px; font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="glass-bg" id="weatherBg"></div>
+
+    <div class="search-overlay" id="searchOverlay">
+        <form class="search-form" id="searchForm">
+            <button class="close-search" type="button" id="btnCloseSearch">x</button>
+            <h2 class="section-subtitle" style="margin-top: 0; color: #fff;">
+                <span>🌐</span> Pesquisar Região
+            </h2>
+            <div class="search-input-wrapper">
+                <input type="text" class="search-input" id="searchInput" placeholder="Digite cidade ou país..." required>
+            </div>
+            <button type="submit" class="btn-search-action">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px;">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                Buscar Clima
+            </button>
+        </form>
+    </div>
+
+    <div class="app-container">
+        
+        <header>
+            <div class="logo-date-wrapper">
+                <div class="logo">NEXUS<span>WEATHER</span></div>
+                <div class="current-date" id="date">--/--/---- --:--</div>
+            </div>
+            <button id="btnOpenSearch">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                Buscar
+            </button>
+        </header>
+
+        <section class="weather-main">
+            <div class="location">
+                <span id="cityName">Vinhedo</span> <small id="countryCode">SP, BR</small>
+            </div>
+            
+            <div class="weather-icon" id="weatherIcon">☀️</div>
+            
+            <h1 class="temperature" id="temperature">--°C</h1>
+            <p class="funny-quote" id="conditionQuote">Processando dados sinceros...</p>
+        </section>
+
+        <div class="details-grid">
+            <div class="detail-item">
+                <span class="detail-icon-full">🌡️</span>
+                <div class="detail-info">
+                    <span class="detail-label">Temperatura</span>
+                    <span class="detail-value"><span id="tempMin">--°C</span> / <span id="tempMax">--°C</span></span>
+                </div>
+            </div>
+            <div class="detail-item">
+                <span class="detail-icon-full">🌡️</span>
+                <div class="detail-info">
+                    <span class="detail-label">Sensação térm...</span>
+                    <span class="detail-value"><span id="feelsLikeMin">--°C</span> / <span id="feelsLikeMax">--°C</span></span>
+                </div>
+            </div>
+            <div class="detail-item">
+                <span class="detail-icon-full">🌧️</span>
+                <div class="detail-info">
+                    <span class="detail-label">Chuva</span>
+                    <span class="detail-value" id="rainMm">0.0mm</span>
+                </div>
+            </div>
+            <div class="detail-item">
+                <span class="detail-icon-full">💧</span>
+                <div class="detail-info">
+                    <span class="detail-label">Umidade do ar</span>
+                    <span class="detail-value" id="humidity">--%</span>
+                </div>
+            </div>
+            <div class="detail-item">
+                <span class="detail-icon-full">💨</span>
+                <div class="detail-info">
+                    <span class="detail-label">Vento</span>
+                    <span class="detail-value"><span id="windDir">E -</span> <span id="windSpeed">--km/h</span></span>
+                </div>
+            </div>
+            <div class="detail-item">
+                <span class="detail-icon-full">☀️</span>
+                <div class="detail-info">
+                    <span class="detail-label">Sol</span>
+                    <span class="detail-value"><span id="sunrise">--h</span> às <span id="sunset">--h</span></span>
+                </div>
+            </div>
+            <div class="detail-item" style="grid-column: span 2;">
+                <span class="detail-icon-full">🌙</span>
+                <div class="detail-info">
+                    <span class="detail-label">Lua</span>
+                    <span class="detail-value" id="moonPhase">Frase descontraída da lua.</span>
+                </div>
+            </div>
+        </div>
+
+        <section class="indices-section">
+            <h3>Índices Sinceros</h3>
+            <div class="indices-grid">
+                <div class="index-card">
+                    <span class="index-icon-card">☀️</span>
+                    <div class="index-content">
+                        <h4>Índice UV</h4>
+                        <p id="uvQuote">Carregando...</p>
+                    </div>
+                </div>
+                <div class="index-card">
+                    <span class="index-icon-card">🌳</span>
+                    <div class="index-content">
+                        <h4>Qualidade do Ar</h4>
+                        <p id="airQualityQuote">Carregando...</p>
+                    </div>
+                </div>
+                <div class="index-card">
+                    <span class="index-icon-card">🥶</span>
+                    <div class="index-content">
+                        <h4>Gripe e Resfriado</h4>
+                        <p id="fluQuote">Carregando...</p>
+                    </div>
+                </div>
+                <div class="index-card">
+                    <span class="index-icon-card">🥩</span>
+                    <div class="index-content">
+                        <h4>Churrasco</h4>
+                        <p id="barbecueQuote">Carregando...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            NEXUSWEATHER >_ REALTIME CLIMA.
+        </footer>
+    </div>
+
+    <script>
+        const funnyQuotes = {
+            ensolaradoQuente: [
+                "Hoje o clima tá bom pra um churrasco e uma cervejinha gelada! 🥩🍺",
+                "Já pensou em pegar uma piscininha hoje? O sol tá estalando! 🏊‍♂️☀️",
+                "Passe protetor solar até na alma, porque o negócio tá quente! 🥵🔥",
+                "Clima perfeito para estender a roupa (vai secar em 5 minutos). 👕☀️",
+                "Pode assar um pão de queijo no capô do carro. É o apocalipse, mas com café! 🍞☀️" // NOVA
+            ],
+            ameno: [
+                "Nem muito quente, nem muito frio. Clima de 'talvez eu saia de casa'. 😎",
+                "Temperatura perfeita pra abrir a janela e fingir que tem ar condicionado. 🌬️",
+                "Clima favorável para tomar um sorvete ou um café. Você que lute pra decidir! 🍦☕",
+                "Aquela temperatura que não te faz suar, mas também não congela. Um luxo! ✨",
+                "Clima bom pra um beijo... ou pra dormir. A dúvida cruel da vida. 😘🛌" // NOVA
+            ],
+            nublado: [
+                "O sol tirou folga hoje. Clima perfeito pra maratonar série sem culpa! 📺☁️",
+                "Tá com cara de que vai chover... ou não. O tempo tá indeciso igual a gente. 🤔⛅",
+                "Céu cinza, preguiça em dobro. Pegue seu café e finja que está trabalhando. ☕🥱",
+                "Sem sol para ofuscar a tela do pc. Dia perfeito para programar! 💻☁️",
+                "O sol tá tímido igual eu no tinder. Bora fingir que é feriado! ☁️🥱" // NOVA
+            ],
+            chuvoso: [
+                "Cai a água! Dia oficial de cancelar os rolês e pedir um delivery. 🌧️🍕",
+                "Chuvinha boa pra dormir, pena que a gente tem que trabalhar, né? 🛌☔",
+                "Se for sair, não esquece o guarda-chuva pra não fazer cosplay de pinto molhado. 🌂🐥",
+                "O céu está chorando para você não ter que chorar. Fique em casa e relaxe! 🌧️🏡",
+                "Dia perfeito pra comer pinhão e jogar dama. Mas quem sabe onde vende pinhão? 🌧️🍕" // NOVA
+            ],
+            frio: [
+                "Tira o casaco do fundo do armário que a friaca chegou! 🧥🥶",
+                "Clima oficial de tomar chocolate quente debaixo da coberta. ☕🛌",
+                "Só um banho fervendo pra salvar hoje. Cuidado pra não derreter! 🚿🐧",
+                "Hoje tá tão frio que até o Wi-Fi tá congelando. 🥶🧊"
+            ],
+            frioExtremo: [
+                "Pode pedir folga? O clima tá pedindo pra gente não sair da cama. 🥶🛌" // NOVA (adaptada do pedido anterior)
+            ]
+        };
+
+        const detailedQuotes = {
+            moon: [
+                "Frase descontraída da lua. Está ali no céu, juro. 🌙🧐",
+                "Tire uma foto! A fase da lua tá pedindo. 🌙📸",
+                "Lua cheia! Cuidado com os lobisomens no WhatsApp. 🌙🐺"
+            ],
+            rainbow: [
+                "Prepara o celular! 🌈✨",
+                "Pode ter, mas tá escondido. ☁️🧐"
+            ],
+            windDir: ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
+        };
+
+        const indicesQuotes = {
+            uv: [
+                "Exagerado! Passe protetor solar até nos pensamentos. 🥵🔥",
+                "Médio. Dá pra sair, mas sem abusar. ☀️🧐"
+            ],
+            air: [
+                "Dá pra respirar, mas prefira a floresta. 🌳💨",
+                "Puro! O clima de Vinhedo tá uma delícia. 🌳✨"
+            ],
+            flu: [
+                "Toma chá de gengibre, não custa nada. 🥶☕",
+                "Baixo. O clima tá favorável pra você não ficar doente. 😎✨"
+            ],
+            barbecue: [
+                "Perfeito! O clima tá pedindo uma costela. 🥩🍺",
+                "Arriscado! A chuva pode apagar o carvão. 🌧️🧐"
+            ]
+        }
+
+        const OWM_API_KEY = 'SUA_CHAVE_API_AQUI'; // Substitua por sua chave real!
+        const initialCity = 'Vinhedo';
+
+        // Lógica de Sorteio de Climas (REMOVER conforme pedido)
+        /* function sortearFrase(arrayDeFrases) {
+            const indexAleatorio = Math.floor(Math.random() * arrayDeFrases.length);
+            return arrayDeFrases[indexAleatorio];
+        } */
+
+        // Função que gera o clima na tela (REMOVER conforme pedido - usaremos API)
+        /* function gerarClima() { ... } */
+
+        // Função para atualizar a data e hora
+        function updateDateTime() {
+            const dateEl = document.getElementById('date');
+            const now = new Date();
+            dateEl.innerText = now.toLocaleDateString('pt-BR') + ' ' + now.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+        }
+
+        // Função para sortear uma frase sincera do banco
+        function getRandomFunnyQuote(type) {
+            const array = funnyQuotes[type];
+            if (!array) return "Dados sinceros processando...";
+            return array[Math.floor(Math.random() * array.length)];
+        }
+
+        // Função para sortear frases descontraídas para os detalhes adicionais
+        function getRandomDetailedQuote(type) {
+            const array = detailedQuotes[type];
+            if (!array) return "--";
+            return array[Math.floor(Math.random() * array.length)];
+        }
+
+        // Função para sortear frases descontraídas para os índices
+        function getRandomIndicesQuote(type) {
+            const array = indicesQuotes[type];
+            if (!array) return "Carregando...";
+            return array[Math.floor(Math.random() * array.length)];
+        }
+
+        // Função que converte Kelvin para Celsius
+        function kelvinToCelsius(kelvin) { return (kelvin - 273.15).toFixed(1); }
+
+        // Função que converte Unix timestamp para Time (hh:mm)
+        function unixToTime(unix) {
+            const date = new Date(unix * 1000);
+            return date.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+        }
+
+        // Função que converte graus do vento para direção cardinal
+        function degreesToCardinal(degrees) {
+            const directions = detailedQuotes.windDir;
+            const index = Math.round((degrees % 360) / 45);
+            return directions[index % 8];
+        }
+
+        // Função para atualizar o clima dinamicamente com base nos dados reais
+        function updateUIWithWeatherData(data) {
+            const appContainer = document.querySelector('.app-container');
+            const bgEl = document.getElementById('weatherBg');
+            const conditionIconEl = document.getElementById('weatherIcon');
+            const temperatureEl = document.getElementById('temperature');
+            const conditionQuoteEl = document.getElementById('conditionQuote');
+
+            // Atualiza os textos da localidade
+            document.getElementById('cityName').innerText = data.name;
+            document.getElementById('countryCode').innerText = data.sys.country;
+
+            // Dados reais
+            const temp = parseFloat(kelvinToCelsius(data.main.temp));
+            const feelsLike = parseFloat(kelvinToCelsius(data.main.feels_like));
+            const conditionMain = data.weather[0].main;
+            const humidity = data.main.humidity;
+            const windSpeed = (data.wind.speed * 3.6).toFixed(1); // m/s -> km/h
+            const windDirDegrees = data.wind.deg;
+
+            // Preenche os campos de dados reais
+            temperatureEl.innerText = `${temp}°C`;
+            document.getElementById('feelsLikeMin').innerText = `${feelsLike}°C`;
+            document.getElementById('feelsLikeMax').innerText = `${feelsLike}°C`; // API OWM grátis não dá min/max para sensação
+            document.getElementById('tempMin').innerText = `${kelvinToCelsius(data.main.temp_min)}°C`;
+            document.getElementById('tempMax').innerText = `${kelvinToCelsius(data.main.temp_max)}°C`;
+            document.getElementById('humidity').innerText = `${humidity}%`;
+            document.getElementById('windSpeed').innerText = `${windSpeed}km/h`;
+            document.getElementById('windDir').innerText = `${degreesToCardinal(windDirDegrees)} -`;
+            document.getElementById('sunrise').innerText = `${unixToTime(data.sys.sunrise)}h`;
+            document.getElementById('sunset').innerText = `${unixToTime(data.sys.sunset)}h`;
+
+            // Tratamento fictício para dados não fornecidos diretamente ou baseados em frases
+            document.getElementById('rainMm').innerText = `${(data.rain && data.rain['3h'] ? data.rain['3h'] : 0.0).toFixed(1)}mm`;
+            document.getElementById('moonPhase').innerText = getRandomDetailedQuote('moon');
+            
+            // Frases descontraídas para os índices (baseado na image_24.png)
+            document.getElementById('uvQuote').innerText = getRandomIndicesQuote('uv');
+            document.getElementById('airQualityQuote').innerText = getRandomIndicesQuote('air');
+            document.getElementById('fluQuote').innerText = getRandomIndicesQuote('flu');
+            document.getElementById('barbecueQuote').innerText = getRandomIndicesQuote('barbecue');
+
+            // 👇 A MÁGICA: Mudar fundo, ícone e frase sincera de forma dinâmica
+            let funnyQuoteType = 'ameno';
+
+            // Mapeamento dinâmico baseado na condição e temperatura
+            if (conditionMain === 'Clear') {
+                conditionIconEl.innerText = '☀️';
+                bgEl.style.background = 'linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%)';
+                funnyQuoteType = temp > 25 ? 'ensolaradoQuente' : 'ameno';
+            } else if (conditionMain === 'Clouds') {
+                conditionIconEl.innerText = '☁️';
+                bgEl.style.background = 'linear-gradient(135deg, #757f9a 0%, #d7dde8 100%)';
+                funnyQuoteType = 'nublado';
+            } else if (['Rain', 'Drizzle', 'Thunderstorm'].includes(conditionMain)) {
+                conditionIconEl.innerText = '🌧️';
+                bgEl.style.background = 'linear-gradient(135deg, #2b5876 0%, #4e4376 100%)';
+                funnyQuoteType = 'chuvoso';
+            } else if (['Snow', 'Mist', 'Smoke', 'Haze', 'Dust', 'Fog', 'Sand', 'Ash', 'Squall', 'Tornado'].includes(conditionMain)) {
+                conditionIconEl.innerText = '💨';
+                bgEl.style.background = 'linear-gradient(135deg, #b3cdd1 0%, #9bc1bc 100%)';
+                funnyQuoteType = 'ameno'; // Genérico
+            }
+
+            // Tratamento extra para temperatura fria
+            if (temp < 15) funnyQuoteType = 'frio';
+            if (temp < 10) funnyQuoteType = 'frioExtremo';
+
+            // Sorteia a frase sincera
+            conditionQuoteEl.innerText = `"${getRandomFunnyQuote(funnyQuoteType)}"`;
+        }
+
+        // Função para buscar dados do clima na API real
+        async function fetchWeatherData(city) {
+            // Se a chave não for alterada, exibe aviso e dados fictícios de exemplo. Site OpenWeatherMap: https://openweathermap.org/appid
+            if (OWM_API_KEY === 'SUA_CHAVE_API_AQUI') {
+                alert("NEXUSWEATHER >_ REALTIME CLIMA: Você precisa substituir 'SUA_CHAVE_API_AQUI' no script.js por uma chave real do OpenWeatherMap!");
+                
+                // Exemplo de dados fictícios para demonstração
+                const exampleData = {
+                    name: "Vinhedo",
+                    sys: { country: "BR", sunrise: 1716369120, sunset: 1716410220 },
+                    main: { temp: 298.65, temp_min: 297.15, temp_max: 300.15, feels_like: 299.15, humidity: 65 },
+                    weather: [{ main: "Clouds", description: "few clouds" }],
+                    wind: { speed: 3.2, deg: 90 },
+                    rain: { "3h": 0.0 }
+                };
+                updateUIWithWeatherData(exampleData);
+                return;
+            }
+
+            try {
+                const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city},BR&appid=${OWM_API_KEY}`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    updateUIWithWeatherData(data);
+                } else {
+                    alert(`NEXUSWEATHER >_ REALTIME CLIMA: Cidade não encontrada ou erro na API! (${data.message})`);
+                }
+            } catch (error) {
+                console.error('Erro na API:', error);
+                alert("NEXUSWEATHER >_ REALTIME CLIMA: Falha ao conectar com a API de clima!");
+            }
+        }
+
+        // 🔍 Lógica de Pesquisa (Abre a aba suspensa)
+        const btnOpenSearch = document.getElementById('btnOpenSearch');
+        const searchOverlay = document.getElementById('searchOverlay');
+        const btnCloseSearch = document.getElementById('btnCloseSearch');
+        const searchForm = document.getElementById('searchForm');
+        const searchInput = document.getElementById('searchInput');
+
+        btnOpenSearch.addEventListener('click', () => {
+            searchOverlay.classList.add('active');
+            searchInput.focus(); // Coloca o foco no input
+        });
+
+        const closeSearchOverlay = () => {
+            searchOverlay.classList.remove('active');
+            searchForm.reset();
+        };
+
+        btnCloseSearch.addEventListener('click', closeSearchOverlay);
+
+        // Fecha a aba se clicar fora do formulário
+        searchOverlay.addEventListener('click', (e) => {
+            if (e.target === searchOverlay) {
+                closeSearchOverlay();
+            }
+        });
+
+        // Manipula a submissão da busca
+        searchForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const cityQuery = searchInput.value.trim();
+            if (cityQuery) {
+                fetchWeatherData(cityQuery);
+                closeSearchOverlay();
+            }
+        });
+
+        function init() {
+            updateDateTime();
+            fetchWeatherData(initialCity); // Busca clima inicial de Vinhedo-SP
+            setInterval(updateDateTime, 60000); // Atualiza a hora a cada minuto
+        }
+
+        init();
+    </script>
+</body>
+</html>

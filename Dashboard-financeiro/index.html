@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Finance - Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="glass-bg"></div>
+    <div class="app-container">
+        <header>
+            <div class="logo">NEXUS<span>FINANCE</span></div>
+            <div class="current-date" id="date">--/--/----</div>
+        </header>
+
+        <section class="main-balance">
+            <span>Saldo Disponível</span>
+            <h1 id="total-balance">R$ 0,00</h1>
+        </section>
+
+        <div class="grid-dashboard">
+            <div class="summary-cards">
+                <div class="card income">
+                    <div class="icon">↑</div>
+                    <div>
+                        <small>Entradas</small>
+                        <strong id="total-income">R$ 0,00</strong>
+                    </div>
+                </div>
+                <div class="card expense">
+                    <div class="icon">↓</div>
+                    <div>
+                        <small>Saídas</small>
+                        <strong id="total-expense">R$ 0,00</strong>
+                    </div>
+                </div>
+            </div>
+
+            <section class="glass-card">
+                <h3>Nova Transação</h3>
+                <form id="finance-form">
+                    <input type="text" id="desc" placeholder="Ex: Salário Mensal" required>
+                    <div class="input-group">
+                        <input type="number" id="amount" placeholder="Valor" step="0.01" required>
+                        <select id="type">
+                            <option value="income">Entrada</option>
+                            <option value="expense">Saída</option>
+                        </select>
+                    </div>
+                    <button type="submit">Processar Transação</button>
+                </form>
+            </section>
+
+            <section class="glass-card chart-container">
+                <h3>Visão Geral</h3>
+                <canvas id="financeChart"></canvas>
+            </section>
+
+            <section class="glass-card history-section">
+                <h3>Histórico de Atividades</h3>
+                <ul id="transaction-list">
+                    </ul>
+            </section>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
