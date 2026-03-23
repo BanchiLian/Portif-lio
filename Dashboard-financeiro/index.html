@@ -5,66 +5,168 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nexus Finance - Dashboard</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <div class="glass-bg"></div>
     <div class="app-container">
-        <header>
-            <div class="logo">NEXUS<span>FINANCE</span></div>
-            <div class="current-date" id="date">--/--/----</div>
-        </header>
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="icon-logo">⚙️</i>
+                <span>NEXUS<span>FINANCE</span></span>
+            </div>
 
-        <section class="main-balance">
-            <span>Saldo Disponível</span>
-            <h1 id="total-balance">R$ 0,00</h1>
-        </section>
+            <div class="filter-group">
+                <label>Ano</label>
+                <select id="filter-year">
+                    <option value="2026">2026</option>
+                    <option value="2025">2025</option>
+                </select>
+            </div>
 
-        <div class="grid-dashboard">
-            <div class="summary-cards">
-                <div class="card income">
-                    <div class="icon">↑</div>
-                    <div>
-                        <small>Entradas</small>
-                        <strong id="total-income">R$ 0,00</strong>
+            <div class="filter-group">
+                <label>Mês</label>
+                <select id="filter-month">
+                    <option value="all">Ano Todo</option>
+                    <option value="01">Janeiro</option>
+                    <option value="02">Fevereiro</option>
+                    <option value="03">Março</option>
+                    <option value="04">Abril</option>
+                    <option value="05">Maio</option>
+                    <option value="06">Junho</option>
+                    <option value="07">Julho</option>
+                    <option value="08">Agosto</option>
+                    <option value="09">Setembro</option>
+                    <option value="10">Outubro</option>
+                    <option value="11">Novembro</option>
+                    <option value="12">Dezembro</option>
+                </select>
+            </div>
+
+            <div class="accounts-summary">
+                <div class="accounts-header">
+                    <span>Contas Correntes</span>
+                </div>
+                <ul id="accounts-list">
+                    </ul>
+            </div>
+            
+            <button class="btn-clear" onclick="clearData()">Limpar Dados</button>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-header">
+                <h2>Visão Geral do Patrimônio</h2>
+                <div class="date-display" id="date">--/--/----</div>
+            </header>
+
+            <div class="kpi-grid">
+                <div class="kpi-card card-orange">
+                    <div class="kpi-info">
+                        <span>Saldo Conta Corrente</span>
+                        <h3 id="total-balance">R$ 0,00</h3>
                     </div>
                 </div>
-                <div class="card expense">
-                    <div class="icon">↓</div>
-                    <div>
-                        <small>Saídas</small>
-                        <strong id="total-expense">R$ 0,00</strong>
+                <div class="kpi-card card-dark">
+                    <div class="kpi-info">
+                        <span>Entradas no Período</span>
+                        <h3 id="total-income" style="color: var(--accent-cyan)">R$ 0,00</h3>
+                    </div>
+                </div>
+                <div class="kpi-card card-dark">
+                    <div class="kpi-info">
+                        <span>Despesas no Período</span>
+                        <h3 id="total-expense" style="color: var(--accent-red)">R$ 0,00</h3>
+                    </div>
+                </div>
+
+                <div class="kpi-card card-dark">
+                    <div class="kpi-info">
+                        <span>Poupança (Acumulado)</span>
+                        <h3 id="total-poupanca" style="color: var(--accent-green)">R$ 0,00</h3>
+                    </div>
+                </div>
+                <div class="kpi-card card-dark">
+                    <div class="kpi-info">
+                        <span>Ações / FIIs (Acumulado)</span>
+                        <h3 id="total-investimentos" style="color: #b533ff">R$ 0,00</h3>
+                    </div>
+                </div>
+                
+                <div class="kpi-card card-dark" style="border-color: var(--accent-orange); position: relative;">
+                    <div class="kpi-info" style="width: 100%;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                            <span id="budget-label">Limite Mensal Disponível</span>
+                            
+                            <div id="annual-budget-config" style="display: none;">
+                                <label style="font-size:0.7rem; color:var(--text-muted); margin-right:5px;">Meta Anual R$</label>
+                                <input type="number" id="annual-budget-input" class="budget-input">
+                            </div>
+                        </div>
+                        
+                        <h3 id="budget-left">R$ 0,00</h3>
+                        <small id="budget-sub" style="color: var(--text-muted); font-size: 0.75rem;">Limite Máx: R$ 2.100</small>
                     </div>
                 </div>
             </div>
 
-            <section class="glass-card">
-                <h3>Nova Transação</h3>
-                <form id="finance-form">
-                    <input type="text" id="desc" placeholder="Ex: Salário Mensal" required>
-                    <div class="input-group">
-                        <input type="number" id="amount" placeholder="Valor" step="0.01" required>
-                        <select id="type">
-                            <option value="income">Entrada</option>
-                            <option value="expense">Saída</option>
+            <div class="middle-grid">
+                <div class="chart-box">
+                    <h3>Top Entradas</h3>
+                    <div class="canvas-container"><canvas id="barChart"></canvas></div>
+                </div>
+                <div class="chart-box">
+                    <h3>Top Despesas</h3>
+                    <div class="canvas-container"><canvas id="doughnutChart"></canvas></div>
+                </div>
+            </div>
+
+            <div class="bottom-grid">
+                <div class="chart-box">
+                    <h3>Evolução do Ano Inteiro (Despesas vs Entradas)</h3>
+                    <div class="canvas-container"><canvas id="mixedChart"></canvas></div>
+                </div>
+                
+                <div class="action-box">
+                    <h3>Nova Transação</h3>
+                    <form id="finance-form">
+                        <input type="text" id="desc" placeholder="Descrição (Ex: Salário, Jantar...)" required>
+                        <div class="input-row">
+                            <input type="number" id="amount" placeholder="Valor" step="0.01" required>
+                            <input type="date" id="t-date" required>
+                        </div>
+                        <div class="input-row">
+                            <select id="type">
+                                <option value="income">Entrada (+)</option>
+                                <option value="expense">Saída (-)</option>
+                            </select>
+                            <select id="category">
+                                <option value="Salário">Salário</option>
+                                <option value="Moradia">Moradia</option>
+                                <option value="Alimentação">Alimentação</option>
+                                <option value="Transporte">Transporte</option>
+                                <option value="Lazer">Lazer</option>
+                                <option value="Saúde">Saúde</option>
+                                <option value="Poupança">➡️ Guardar: Poupança</option>
+                                <option value="Investimentos">➡️ Guardar: Ações/FII</option>
+                                <option value="Outros">Outros</option>
+                            </select>
+                        </div>
+                        <select id="account-select">
+                            <option value="CAIXXXA">CAIXXXA</option>
+                            <option value="BUBANK">BUBANK</option>
+                            <option value="WISA">WISA</option>
                         </select>
+                        <button type="submit" class="btn-submit">Registrar Transação</button>
+                    </form>
+
+                    <div class="history-section">
+                        <h4>Histórico (Período Selecionado)</h4>
+                        <ul id="transaction-list"></ul>
                     </div>
-                    <button type="submit">Processar Transação</button>
-                </form>
-            </section>
-
-            <section class="glass-card chart-container">
-                <h3>Visão Geral</h3>
-                <canvas id="financeChart"></canvas>
-            </section>
-
-            <section class="glass-card history-section">
-                <h3>Histórico de Atividades</h3>
-                <ul id="transaction-list">
-                    </ul>
-            </section>
-        </div>
+                </div>
+            </div>
+        </main>
     </div>
     <script src="script.js"></script>
 </body>
