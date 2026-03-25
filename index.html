@@ -75,7 +75,7 @@
     .sidebar.collapsed {
       width: 75px;
       padding: 1.5rem 0.5rem;
-      overflow: visible; /* A MÁGICA: Libera a caixa flutuante para sair do menu! */
+      overflow: visible;
     }
 
     .toggle-container {
@@ -200,9 +200,9 @@
 
     /* Transforma o texto que era invisível na Caixa Flutuante (Tooltip) */
     .sidebar.collapsed .nav-text {
-      display: block; /* Faz o texto voltar a existir na tela */
+      display: block;
       position: absolute;
-      left: 100%; /* Joga a caixa para fora do menu (à direita) */
+      left: 100%;
       top: 50%;
       transform: translateY(-50%) translateX(10px);
       background: var(--bg-dark);
@@ -211,17 +211,16 @@
       border-radius: 4px;
       border: 1px solid var(--primary);
       box-shadow: 0 4px 15px var(--shadow);
-      opacity: 0; /* Começa invisível */
+      opacity: 0;
       visibility: hidden;
       transition: all 0.3s ease;
       white-space: nowrap;
       z-index: 1000;
       font-size: 0.95rem;
       font-weight: normal;
-      pointer-events: none; /* Impede que o mouse bugue ao encostar na caixa */
+      pointer-events: none;
     }
 
-    /* Cria a "setinha" apontando para o ícone */
     .sidebar.collapsed .nav-text::after {
       content: '';
       position: absolute;
@@ -233,12 +232,11 @@
       border-color: transparent var(--primary) transparent transparent;
     }
 
-    /* A Mágica: Aparece suavemente quando o mouse passa em cima do botão */
     .sidebar.collapsed nav button:hover .nav-text,
     .sidebar.collapsed #btnTheme:hover .nav-text {
       opacity: 1;
       visibility: visible;
-      transform: translateY(-50%) translateX(15px); /* Faz um efeitinho de deslizar */
+      transform: translateY(-50%) translateX(15px);
     }
 
     /* Botão Tema Dark/Light no Menu Lateral */
@@ -343,7 +341,7 @@
       gap: 10px;
     }
 
-    /* 🚀 SEÇÃO INÍCIO (DUAS COLUNAS + BORDA 8-BITS) */
+    /* 🚀 SEÇÃO INÍCIO */
     .hero-section {
       padding: 4rem 3rem;
       display: flex;
@@ -351,16 +349,14 @@
       position: relative;
     }
 
-    /* 🎮 BORDA 8-BITS RETRO */
     .pixel-border {
       position: absolute;
       top: 15px; left: 15px; right: 15px; bottom: 15px;
-      border: 4px solid var(--primary); /* Linha grossa retro */
+      border: 4px solid var(--primary);
       pointer-events: none;
       z-index: 0;
     }
 
-    /* Pontas quadradas da Borda (Efeito Jogo de Nintendinho) */
     .pixel-corner {
       position: absolute;
       width: 14px; height: 14px;
@@ -372,11 +368,10 @@
     .pc-bl { bottom: -9px; left: -9px; }
     .pc-br { bottom: -9px; right: -9px; }
 
-    /* Estilo dos Emojis na borda */
     .emoji-deco {
       position: absolute;
       font-size: 1.6rem;
-      background: var(--bg-card); /* Mesma cor do fundo para cortar a linha */
+      background: var(--bg-card);
       padding: 5px;
       display: flex;
       gap: 10px;
@@ -393,16 +388,14 @@
     .emoji-side-left { top: 40%; left: -22px; flex-direction: column; }
     .emoji-side-right { top: 40%; right: -22px; flex-direction: column; }
 
-    /* O layout dividido fica acima da borda */
     .hero-split {
       display: flex;
       align-items: center;
       gap: 4rem;
       width: 100%;
-      z-index: 1; /* Fica acima da moldura */
+      z-index: 1;
     }
 
-    /* Esquerda: Foto, Links e Status */
     .hero-left {
       flex: 4;
       display: flex;
@@ -446,7 +439,7 @@
       font-size: 0.95rem;
       transition: 0.3s;
       background: rgba(128, 128, 128, 0.05);
-      pointer-events: auto; /* Necessário por causa do Z-index da borda */
+      pointer-events: auto;
     }
 
     .hero-badge:hover {
@@ -456,7 +449,6 @@
       box-shadow: 0 4px 15px var(--shadow);
     }
 
-    /* Bolinha Online */
     .status-dot-wrapper {
       display: inline-flex;
       align-items: center;
@@ -469,7 +461,6 @@
       border-radius: 4px;
     }
 
-    /* Direita: Textos e Projeto */
     .hero-right {
       flex: 6;
       display: flex;
@@ -490,7 +481,7 @@
       border-right: 4px solid var(--primary);
       overflow: hidden;
       white-space: nowrap;
-      margin: 0; /* 👇 A MÁGICA ACONTECE AQUI: Remove o espaçamento que vinha do H2 */
+      margin: 0;
       letter-spacing: normal; 
       width: 25ch; 
       animation: typing 2s steps(25, end) forwards, blink-caret 0.8s step-end infinite;
@@ -522,7 +513,6 @@
       color: var(--text);
     }
 
-    /* Badges de Status do Jogador */
     .hero-player-status {
       display: flex;
       gap: 1rem;
@@ -544,7 +534,6 @@
       background: rgba(128, 128, 128, 0.05);
     }
 
-    /* 🔥 MINI-CARD DE PROJETO EM DESTAQUE */
     .featured-project {
       background: var(--bg-light);
       border: 1px solid var(--primary);
@@ -558,7 +547,7 @@
       transition: 0.3s;
       width: 100%;
       max-width: 450px;
-      pointer-events: auto; /* Permite clique */
+      pointer-events: auto;
     }
 
     body.dark-mode .featured-project {
@@ -614,7 +603,6 @@
       text-decoration: underline;
     }
 
-    /* Botão WhatsApp Animado */
     .btn-whatsapp-cta {
       display: inline-flex;
       align-items: center;
@@ -631,7 +619,7 @@
       text-transform: uppercase;
       letter-spacing: 1px;
       animation: pulse-green 2s infinite;
-      pointer-events: auto; /* Permite clique */
+      pointer-events: auto;
     }
 
     .btn-whatsapp-cta:hover {
@@ -646,7 +634,7 @@
       100% { box-shadow: 0 0 0 0 rgba(107, 142, 35, 0); }
     }
 
-    /* 🧔 SEÇÃO SOBRE MIM (ZIG-ZAG) */
+    /* 🧔 SEÇÃO SOBRE MIM */
     .about-story {
       display: flex;
       flex-direction: column;
@@ -711,7 +699,7 @@
       z-index: -1;
     }
 
-    /* 💻 SEÇÃO HABILIDADES (60/40 SPLIT) */
+    /* 💻 SEÇÃO HABILIDADES */
     .skills-split-container {
       display: grid;
       grid-template-columns: 6fr 4fr;
@@ -864,7 +852,7 @@
       line-height: 1.4;
     }
 
-    /* 🧩 VITRINE DE PROJETOS */
+    /* 🧩 PROJETOS */
     .projects-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -1301,7 +1289,6 @@
       .sidebar:not(.open) .profile img { width: 45px; height: 45px; border-width: 2px; }
       .sidebar:not(.open) nav button { justify-content: center; padding: 0.8rem 0; }
       
-      /* Esconde a Borda Pixelada no celular (Fica muito apertado) */
       .pixel-border { display: none; }
 
       .hero-section { padding: 2rem 1rem; }
@@ -1401,12 +1388,8 @@
             <img src="./perfil.jpg" alt="Elian Mori" class="home-photo" loading="lazy">
             
             <div class="hero-badges">
-              <a href="https://linkedin.com/in/elianmori" target="_blank" class="hero-badge">
-                💼 LinkedIn
-              </a>
-              <a href="https://github.com/BanchiLian" target="_blank" class="hero-badge">
-                🐙 GitHub
-              </a>
+              <a href="https://linkedin.com/in/elianmori" target="_blank" class="hero-badge">💼 LinkedIn</a>
+              <a href="https://github.com/BanchiLian" target="_blank" class="hero-badge">🐙 GitHub</a>
             </div>
 
             <div class="status-dot-wrapper">
@@ -1426,7 +1409,7 @@
             </p>
 
             <div class="featured-project">
-              <img src="https://via.placeholder.com/80x80/333/00f2ff?text=Dash" alt="Dashboard Financeiro" class="featured-img">
+              <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80" alt="Dashboard Financeiro" class="featured-img">
               <div class="featured-info">
                 <span class="featured-badge-text">🔥 Projeto em Destaque</span>
                 <h4>Nexus Finance Dashboard</h4>
@@ -1447,7 +1430,6 @@
               Falar no WhatsApp
             </a>
           </div>
-
         </div>
       </div>
 
@@ -1612,10 +1594,10 @@
         <h2>🚀 Meus Projetos</h2>
         <p style="margin-bottom: 2rem;">Confira alguns dos projetos que desenvolvi para colocar meus conhecimentos em prática.</p>
         
-       <div class="projects-grid">
+        <div class="projects-grid">
           
           <div class="project-card">
-            <img src="https://via.placeholder.com/400x200/333/00f2ff?text=Nexus+Finance" alt="Dashboard Financeiro" class="project-img" loading="lazy">
+            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80" alt="Dashboard Financeiro" class="project-img" loading="lazy">
             <div class="project-content">
               <h3 class="project-title">Nexus Finance Dashboard</h3>
               <p class="project-desc">Uma aplicação web completa para controle de finanças com interface Glassmorphism, gráficos dinâmicos e persistência de dados local (LocalStorage).</p>
@@ -1632,7 +1614,7 @@
           </div>
 
           <div class="project-card">
-            <img src="https://via.placeholder.com/400x200/333/7000ff?text=Nexus+Weather" alt="App de Clima" class="project-img" loading="lazy">
+            <img src="https://images.unsplash.com/photo-1601134467661-3d775b999c8b?w=800&q=80" alt="App de Clima" class="project-img" loading="lazy">
             <div class="project-content">
               <h3 class="project-title">NexusWeather API</h3>
               <p class="project-desc">App de previsão do tempo em tempo real com design futurista. Consome a API do OpenWeatherMap e exibe frases descontraídas baseadas no clima atual.</p>
@@ -1649,7 +1631,7 @@
           </div>
 
           <div class="project-card">
-            <img src="https://via.placeholder.com/400x200/333/00f2ff?text=Nexus+Setup" alt="Landing Page Comercial" class="project-img" loading="lazy">
+            <img src="https://images.unsplash.com/photo-1593640408182-31c70c8268f5?w=800&q=80" alt="Landing Page Comercial" class="project-img" loading="lazy">
             <div class="project-content">
               <h3 class="project-title">Landing Page: Nexus Setup</h3>
               <p class="project-desc">Página de vendas de alta conversão para um ecossistema de hardware gamer/dev. Desenvolvida no modelo Mobile-First com uso avançado de Flexbox.</p>
@@ -1666,6 +1648,7 @@
           </div>
 
         </div>
+      </div>
 
       <div id="sectionCV" class="content-section">
         <h2>📄 Meu Currículo</h2>
@@ -1913,31 +1896,26 @@
         localStorage.setItem('theme', 'light');
       }
     });
+
+    // 4. SCROLL RESET E CORREÇÃO MOBILE
+    function resetScroll() {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
+
+    const menuButtons = document.querySelectorAll('.sidebar nav button');
+
+    menuButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        setTimeout(resetScroll, 10);
+        
+        if (window.innerWidth <= 768) {
+          document.querySelector('.sidebar').classList.add('collapsed');
+        }
+      });
+    });
   </script>
-
-  <script>
-  // Esta função garante que o scroll volte ao topo ao mudar de aba
-  function resetScroll() {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-  }
-
-  // Seleciona todos os botões do menu lateral
-  const menuButtons = document.querySelectorAll('.sidebar nav button');
-
-  menuButtons.forEach(button => {
-    button.addEventListener('click', () => {
-      // Pequeno delay para a seção carregar antes de subir o scroll
-      setTimeout(resetScroll, 10);
-      
-      // Se estiver no celular, fecha o menu automaticamente ao clicar
-      if (window.innerWidth <= 768) {
-        document.querySelector('.sidebar').classList.add('collapsed');
-      }
-    });
-  });
-</script>
 </body>
 </html>

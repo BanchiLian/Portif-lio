@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Nexus Futevôlei Pro</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0d0d0d">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg-dark: #0d0d0d; --bg-card: #1a1a1a;
+      --primary: #caff04; --primary-dark: #9acc00;
+      --text-main: #ffffff; --text-muted: #888888;
+      --border: #333333; --danger: #ff3333;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background-color: var(--bg-dark); color: var(--text-main); display: flex; justify-content: center; }
+
+    .app-container { width: 100%; max-width: 480px; min-height: 100vh; background-color: var(--bg-dark); display: flex; flex-direction: column; position: relative; overflow-x: hidden; }
+
+    /* VIEW MANAGEMENT */
+    .view { display: none; flex-direction: column; min-height: 100vh; animation: fadeIn 0.3s; padding-bottom: 40px;}
+    .view.active { display: flex; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
+    /* SHARED HEADER */
+    .top-header { background: var(--bg-card); padding: 20px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10;}
+    .btn-back { background: transparent; border: none; color: var(--primary); font-size: 1.2rem; cursor: pointer; }
+    .top-header h2 { font-size: 1.2rem; font-weight: 800; }
+
+    /* ---------------- HOME SCREEN & WIDGETS ---------------- */
+    .home-header { text-align: center; padding: 40px 20px 20px; }
+    .home-header h1 { font-size: 2rem; color: var(--primary); font-weight: 800; text-transform: uppercase; letter-spacing: -1px;}
+    .home-header p { color: var(--text-muted); font-size: 0.9rem; margin-top: 5px; }
+
+    .widget-menu { display: flex; flex-direction: column; gap: 20px; padding: 20px; }
+    .widget-btn { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 30px 20px; display: flex; align-items: center; gap: 20px; cursor: pointer; transition: 0.2s; }
+    .widget-btn:active { transform: scale(0.98); border-color: var(--primary); }
+    .w-icon { background: rgba(202, 255, 4, 0.1); color: var(--primary); width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.8rem; }
+    .w-text { text-align: left; }
+    .w-text h3 { font-size: 1.3rem; margin-bottom: 4px; }
+    .w-text p { font-size: 0.85rem; color: var(--text-muted); }
+
+    /* ---------------- FORMS & INPUTS ---------------- */
+    .form-container { padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+    .form-group { display: flex; flex-direction: column; gap: 8px; }
+    .form-group label { font-size: 0.9rem; font-weight: 600; color: var(--text-muted); }
+    .form-control { background: #000; border: 1px solid var(--border); color: #fff; padding: 15px; border-radius: 8px; font-size: 1rem; outline: none; }
+    .form-control:focus { border-color: var(--primary); }
+    
+    /* Range Slider */
+    input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 20px; width: 20px; border-radius: 50%; background: var(--primary); cursor: pointer; margin-top: -8px; }
+    input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: var(--border); border-radius: 2px; }
+    .range-labels { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-muted); margin-top: 5px; }
+
+    .btn-submit { background: var(--primary); color: #000; border: none; padding: 16px; border-radius: 8px; font-size: 1.1rem; font-weight: 800; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
+    .btn-submit:active { background: var(--primary-dark); }
+
+    /* ---------------- ALUNO: TREINOS ---------------- */
+    .day-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 15px; }
+    .day-header { padding: 15px; font-weight: 600; display: flex; justify-content: space-between; cursor: pointer; }
+    .day-content-inner { display: none; padding: 15px; background: rgba(0,0,0,0.3); border-top: 1px solid var(--border); font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; }
+    .day-card.active .day-content-inner { display: block; animation: fadeIn 0.3s; }
+    .day-card.active .day-header { color: var(--primary); }
+    .workouts-list { padding: 20px; display: flex; flex-direction: column; }
+
+    /* ---------------- JOGO: MATCHMAKING ---------------- */
+    .player-card { background: var(--bg-card); border: 1px solid var(--border); padding: 15px; border-radius: 12px; display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
+    .p-avatar { width: 50px; height: 50px; background: var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+    .p-info h4 { font-size: 1.1rem; }
+    .p-info p { font-size: 0.8rem; color: var(--text-muted); }
+    .p-action { margin-left: auto; background: rgba(202, 255, 4, 0.2); color: var(--primary); border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; }
+
+    /* ---------------- PROFESSOR: SCOUTING ---------------- */
+    .scout-controls { display: flex; gap: 10px; padding: 20px; }
+    .btn-scout { flex: 1; padding: 12px; border: 1px solid var(--border); background: var(--bg-card); color: #fff; font-weight: 600; border-radius: 8px; }
+    .btn-scout.active-atk { background: var(--primary); color: #000; border-color: var(--primary); }
+    .btn-scout.active-err { background: var(--danger); color: #fff; border-color: var(--danger); }
+
+    .court-container { padding: 0 20px; display: flex; justify-content: center; }
+    .court { width: 100%; max-width: 300px; aspect-ratio: 1 / 2; border: 4px solid #fff; position: relative; background: #c2b280; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(4, 1fr); }
+    .net { position: absolute; top: 50%; left: -10px; right: -10px; height: 4px; background: #fff; z-index: 2; box-shadow: 0 4px 10px rgba(0,0,0,0.5);}
+    
+    .zone { border: 1px dashed rgba(255,255,255,0.3); display: flex; justify-content: center; align-items: center; font-size: 1.5rem; font-weight: bold; cursor: pointer; position: relative; }
+    .zone:active { background: rgba(255,255,255,0.2); }
+    
+    .mark { position: absolute; width: 12px; height: 12px; border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none;}
+    .mark.atk { background-color: #000; border: 2px solid var(--primary); }
+    .mark.err { background-color: var(--danger); border: 2px solid #fff; }
+
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+
+    <div id="view-home" class="view active">
+      <div class="home-header">
+        <h1>Nexus Pro</h1>
+        <p>Selecione o seu modo de acesso</p>
+      </div>
+
+      <div class="widget-menu">
+        <div class="widget-btn" onclick="goTo('view-aluno-checkin')">
+          <div class="w-icon"><i class="fa-solid fa-dumbbell"></i></div>
+          <div class="w-text">
+            <h3>Área do Aluno</h3>
+            <p>Check-in diário e planilhas de treino.</p>
+          </div>
+        </div>
+
+        <div class="widget-btn" onclick="goTo('view-jogo')">
+          <div class="w-icon"><i class="fa-solid fa-volleyball"></i></div>
+          <div class="w-text">
+            <h3>Modo Jogo</h3>
+            <p>Encontre parceiros para jogar agora.</p>
+          </div>
+        </div>
+
+        <div class="widget-btn" onclick="goTo('view-professor')">
+          <div class="w-icon"><i class="fa-solid fa-clipboard-user"></i></div>
+          <div class="w-text">
+            <h3>Área do Professor</h3>
+            <p>Scouting e gestão de alunos.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="view-aluno-checkin" class="view">
+      <div class="top-header">
+        <button class="btn-back" onclick="goTo('view-home')"><i class="fa-solid fa-chevron-left"></i></button>
+        <h2>Check-in Diário</h2>
+      </div>
+
+      <form class="form-container" onsubmit="submitCheckin(event)">
+        <div class="form-group">
+          <label>Que horas você dormiu?</label>
+          <input type="time" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label>Que horas você acordou?</label>
+          <input type="time" class="form-control" required>
+        </div>
+        
+        <div class="form-group">
+          <label>Nível de Cansaço Geral</label>
+          <input type="range" min="0" max="100" step="25" value="0" id="fadiga-range" oninput="updateFadiga(this.value)">
+          <div class="range-labels">
+            <span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span>
+          </div>
+          <p id="fadiga-text" style="text-align:center; color:var(--primary); font-weight:bold; margin-top:5px;">0% (Zerado)</p>
+        </div>
+
+        <div class="form-group">
+          <label>Nível de Dor Muscular</label>
+          <select class="form-control" required>
+            <option value="">Selecione...</option>
+            <option value="nenhuma">Nenhuma Dor</option>
+            <option value="leve">Leve (Tolerável)</option>
+            <option value="moderada">Moderada (Incomoda no treino)</option>
+            <option value="intensa">Intensa (Preciso de repouso)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Alimentação ontem foi:</label>
+          <select class="form-control" required>
+            <option value="">Selecione...</option>
+            <option value="100">100% na Dieta</option>
+            <option value="80">Dei uma escorregada leve</option>
+            <option value="lixo">Comi muito lixo</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn-submit">Salvar e Ver Treino</button>
+      </form>
+    </div>
+
+    <div id="view-aluno-menu-treinos" class="view">
+      <div class="top-header">
+        <button class="btn-back" onclick="goTo('view-aluno-checkin')"><i class="fa-solid fa-chevron-left"></i></button>
+        <h2>Meus Treinos</h2>
+      </div>
+
+      <div class="widget-menu">
+        <div class="widget-btn" onclick="goTo('view-aluno-areia')">
+          <div class="w-icon"><i class="fa-solid fa-umbrella-beach"></i></div>
+          <div class="w-text">
+            <h3>Treino na Areia</h3>
+            <p>Fundamentos, saltos e jogo.</p>
+          </div>
+        </div>
+
+        <div class="widget-btn" onclick="goTo('view-aluno-academia')">
+          <div class="w-icon"><i class="fa-solid fa-dumbbell"></i></div>
+          <div class="w-text">
+            <h3>Academia</h3>
+            <p>Força, explosão e core.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="view-aluno-areia" class="view">
+      <div class="top-header">
+        <button class="btn-back" onclick="goTo('view-aluno-menu-treinos')"><i class="fa-solid fa-chevron-left"></i></button>
+        <h2>Treino na Areia</h2>
+      </div>
+      <div class="workouts-list" id="lista-areia">
+        </div>
+    </div>
+
+    <div id="view-aluno-academia" class="view">
+      <div class="top-header">
+        <button class="btn-back" onclick="goTo('view-aluno-menu-treinos')"><i class="fa-solid fa-chevron-left"></i></button>
+        <h2>Academia</h2>
+      </div>
+      <div class="workouts-list" id="lista-academia">
+        </div>
+    </div>
+
+    <div id="view-jogo" class="view">
+      <div class="top-header">
+        <button class="btn-back" onclick="goTo('view-home')"><i class="fa-solid fa-chevron-left"></i></button>
+        <h2>Encontrar Parceiro</h2>
+      </div>
+
+      <form id="form-jogo-perfil" class="form-container" onsubmit="submitJogo(event)">
+        <div class="form-group"><label>Seu Nome</label><input type="text" class="form-control" required></div>
+        <div class="form-group"><label>Sua Idade</label><input type="number" class="form-control" required></div>
+        
+        <div class="form-group">
+          <label>Seu Nível</label>
+          <select class="form-control" required>
+            <option value="iniciante">Iniciante</option>
+            <option value="intermediario">Intermediário</option>
+            <option value="avancado">Avançado</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Lado de Preferência</label>
+          <select class="form-control" required>
+            <option value="direita">Direita</option>
+            <option value="esquerda">Esquerda</option>
+            <option value="ambos">Ambos (Direita e Esquerda)</option> </select>
+        </div>
+
+        <div class="form-group"><label>Região / Arena</label><input type="text" class="form-control" placeholder="Ex: Arena Vinhedo" required></div>
+
+        <button type="submit" class="btn-submit">Buscar Jogadores</button>
+      </form>
+
+      <div id="jogo-resultados" class="form-container" style="display: none;">
+        <h3 style="color: var(--primary); margin-bottom: 10px;">Jogadores Próximos:</h3>
+        
+        <div class="player-card">
+          <div class="p-avatar">🧑</div>
+          <div class="p-info"><h4>João Silva</h4><p>Intermediário • Lado Oposto</p></div>
+          <button class="p-action">Chamar</button>
+        </div>
+        
+        <div class="player-card">
+          <div class="p-avatar">👨‍s</div>
+          <div class="p-info"><h4>Carlos Mendes</h4><p>Avançado • Lado Oposto</p></div>
+          <button class="p-action">Chamar</button>
+        </div>
+
+        <button class="btn-submit" style="background: transparent; border: 1px solid var(--border); color: #fff;" onclick="resetJogo()">Voltar aos Filtros</button>
+      </div>
+    </div>
+
+    <div id="view-professor" class="view">
+      <div class="top-header">
+        <button class="btn-back" onclick="goTo('view-home')"><i class="fa-solid fa-chevron-left"></i></button>
+        <h2>Scouting da Partida</h2>
+      </div>
+
+      <div class="scout-controls">
+        <button id="btn-atk" class="btn-scout active-atk" onclick="setScoutMode('atk')">Ataque Adversário</button>
+        <button id="btn-err" class="btn-scout" onclick="setScoutMode('err')">Erro do Aluno</button>
+      </div>
+
+      <p style="text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;">Toque na quadra para registrar o ponto.</p>
+
+      <div class="court-container">
+        <div class="court" id="scout-court" onclick="registerPoint(event)">
+          <div class="net"></div>
+          <div class="zone"></div><div class="zone"></div>
+          <div class="zone"></div><div class="zone"></div>
+          <div class="zone"></div><div class="zone"></div>
+          <div class="zone"></div><div class="zone"></div>
+        </div>
+      </div>
+      
+      <div style="padding: 20px;">
+        <button class="btn-submit" style="background: transparent; border: 1px solid var(--border); color: #fff;" onclick="document.getElementById('scout-court').innerHTML='<div class=\'net\'></div>'+'<div class=\'zone\'></div>'.repeat(8)">Limpar Quadra</button>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    // --- NAVEGAÇÃO DE TELAS ---
+    function goTo(viewId) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.getElementById(viewId).classList.add('active');
+      window.scrollTo(0,0);
+    }
+
+    // --- ALUNO: CHECK-IN ---
+    function updateFadiga(val) {
+      const labels = {
+        "0": "0% (Zerado)", "25": "25% (Leve)", "50": "50% (Cansado)", 
+        "75": "75% (Exausto)", "100": "100% (Morto)"
+      };
+      document.getElementById('fadiga-text').innerText = labels[val];
+    }
+
+    function submitCheckin(e) {
+      e.preventDefault();
+      // O Aluno preencheu o checkin, agora vai para o "Menu de Treinos"
+      goTo('view-aluno-menu-treinos');
+    }
+
+    // --- ALUNO: RENDERIZAÇÃO DOS TREINOS ---
+    const diasSemana = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
+    
+    const treinosAreia = [
+      "Foco: Deslocamento Curto. 4x10 tiros de 3 metros. <br> Ataque de Peito: 3x10 repetições.",
+      "Foco: Resistência. 5 minutos de trote na areia fofa. <br> Defesa base: 4x15 repetições.",
+      "Foco: Salto e Bloqueio. 4x8 saltos na rede simulando bloqueio.",
+      "Foco: Agilidade Lateral. 4x12 toques no cone em X.",
+      "Foco: Jogo Coletivo. Partida treino focada em comunicação."
+    ];
+
+    const treinosAcademia = [
+      "Perna 1 (Força): Agachamento Livre 4x8, Leg Press 3x10, Elevação Pélvica 3x12.",
+      "Superiores (Puxar): Barra Fixa 4x8, Remada Curvada 4x10, Core Rotação 3x20.",
+      "Perna 2 (Unilateral): Búlgaro 4x10/perna, Afundo 3x12, Panturrilha 4x15.",
+      "Superiores (Empurrar): Supino Inclinado 4x10, Desenvolvimento 4x10, Core Flexão.",
+      "Perna 3 (Pliometria): Salto na Caixa 4x5, Kettlebell Swing 4x15."
+    ];
+
+    // Função que insere os dias nas listas respectivas
+    function gerarDiasTreino(containerId, listaTreinos) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+      diasSemana.forEach((dia, i) => {
+        container.innerHTML += `
+          <div class="day-card" onclick="this.classList.toggle('active')">
+            <div class="day-header">
+              <span>${dia}-feira</span>
+              <i class="fa-solid fa-chevron-down" style="font-size: 0.9rem;"></i>
+            </div>
+            <div class="day-content-inner">${listaTreinos[i]}</div>
+          </div>
+        `;
+      });
+    }
+
+    // Inicializa as duas listas em suas respectivas telas
+    gerarDiasTreino('lista-areia', treinosAreia);
+    gerarDiasTreino('lista-academia', treinosAcademia);
+
+    // --- JOGO: MATCHMAKING ---
+    function submitJogo(e) {
+      e.preventDefault();
+      document.getElementById('form-jogo-perfil').style.display = 'none';
+      document.getElementById('jogo-resultados').style.display = 'flex';
+      document.getElementById('jogo-resultados').style.flexDirection = 'column';
+    }
+
+    function resetJogo() {
+      document.getElementById('form-jogo-perfil').style.display = 'flex';
+      document.getElementById('jogo-resultados').style.display = 'none';
+    }
+
+    // --- PROFESSOR: SCOUTING ---
+    let scoutMode = 'atk'; // 'atk' ou 'err'
+
+    function setScoutMode(mode) {
+      scoutMode = mode;
+      document.getElementById('btn-atk').classList.remove('active-atk');
+      document.getElementById('btn-err').classList.remove('active-err');
+      
+      if(mode === 'atk') document.getElementById('btn-atk').classList.add('active-atk');
+      if(mode === 'err') document.getElementById('btn-err').classList.add('active-err');
+    }
+
+    function registerPoint(e) {
+      const court = document.getElementById('scout-court');
+      const rect = court.getBoundingClientRect();
+      
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      const mark = document.createElement('div');
+      mark.className = `mark ${scoutMode}`;
+      mark.style.left = `${x}px`;
+      mark.style.top = `${y}px`;
+
+      court.appendChild(mark);
+    }
+  </script>
+</body>
+</html>

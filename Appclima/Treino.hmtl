@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Futevôlei Performance App</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg-dark: #0d0d0d;
+      --bg-card: #1a1a1a;
+      --primary: #caff04; /* Verde Neon Performance */
+      --text-main: #ffffff;
+      --text-muted: #888888;
+      --border: #333333;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+
+    body { background-color: var(--bg-dark); color: var(--text-main); display: flex; justify-content: center; }
+
+    /* Container simulando a tela do celular */
+    .app-container { width: 100%; max-width: 480px; min-height: 100vh; background-color: var(--bg-dark); display: flex; flex-direction: column; position: relative; padding-bottom: 40px; }
+
+    /* HEADER / PERFIL */
+    .header-profile { background-color: var(--bg-card); padding: 30px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 20px; border-radius: 0 0 20px 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+    
+    .avatar-wrapper { position: relative; width: 80px; height: 80px; flex-shrink: 0; }
+    .avatar-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); }
+    .avatar-edit-btn { position: absolute; bottom: 0; right: 0; background: var(--primary); color: #000; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; cursor: pointer; border: 2px solid var(--bg-card); }
+    #avatar-upload { display: none; }
+
+    .user-info { flex: 1; }
+    .user-name { font-size: 1.4rem; font-weight: 800; border: none; background: transparent; color: var(--text-main); outline: none; width: 100%; margin-bottom: 5px; }
+    .user-stats { display: flex; gap: 15px; font-size: 0.9rem; color: var(--text-muted); }
+    .stat-item { display: flex; align-items: center; gap: 5px; }
+    .stat-input { background: transparent; border: none; color: var(--primary); font-weight: 600; width: 40px; border-bottom: 1px dashed var(--border); outline: none; text-align: center; font-size: 1rem;}
+
+    /* MAIN CONTENT (DIAS DA SEMANA) */
+    .workouts-container { padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+
+    .day-card { background-color: var(--bg-card); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; transition: 0.3s; }
+    .day-header { padding: 18px 20px; font-weight: 600; font-size: 1.1rem; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+    .day-header i { transition: transform 0.3s; color: var(--text-muted); }
+    .day-card.active .day-header { border-bottom: 1px solid var(--border); color: var(--primary); }
+    .day-card.active .day-header i { transform: rotate(180deg); color: var(--primary); }
+    
+    .day-content { display: none; padding: 20px; background: rgba(0,0,0,0.2); }
+    .day-card.active .day-content { display: block; animation: slideDown 0.3s ease-out; }
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ESTRUTURA DO TREINO */
+    .section-title { font-size: 0.85rem; text-transform: uppercase; color: var(--primary); letter-spacing: 1px; margin-bottom: 15px; margin-top: 20px; font-weight: 800; }
+    .section-title:first-child { margin-top: 0; }
+
+    .exercise-row { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--border); }
+    .exercise-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    
+    /* Checkbox Customizado */
+    .custom-checkbox { width: 24px; height: 24px; border-radius: 6px; border: 2px solid var(--text-muted); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; flex-shrink: 0; }
+    .custom-checkbox i { color: #000; font-size: 0.8rem; display: none; }
+    .custom-checkbox.checked { background-color: var(--primary); border-color: var(--primary); }
+    .custom-checkbox.checked i { display: block; }
+
+    .exercise-info { flex: 1; }
+    .ex-name { font-size: 1rem; font-weight: 600; margin-bottom: 3px; }
+    .ex-details { font-size: 0.8rem; color: var(--text-muted); }
+
+    /* Input de Peso (Progression Overload) */
+    .weight-tracker { display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0; }
+    .weight-label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; }
+    .weight-input-wrapper { display: flex; align-items: center; background: #000; border: 1px solid var(--border); border-radius: 6px; padding: 5px; }
+    .weight-input { width: 45px; background: transparent; border: none; color: var(--text-main); font-weight: 600; text-align: center; outline: none; font-size: 0.95rem; }
+    .weight-unit { font-size: 0.7rem; color: var(--text-muted); padding-right: 5px; }
+
+    /* BOTÃO RESETAR TREINO DA SEMANA */
+    .btn-reset { margin: 20px; background: transparent; border: 1px solid var(--border); color: var(--text-muted); padding: 15px; border-radius: 12px; text-align: center; font-weight: 600; cursor: pointer; transition: 0.3s; }
+    .btn-reset:hover { border-color: var(--primary); color: var(--primary); }
+
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <header class="header-profile">
+      <div class="avatar-wrapper">
+        <img src="https://ui-avatars.com/api/?name=Atleta&background=caff04&color=000" alt="Perfil" class="avatar-img" id="profile-img">
+        <label for="avatar-upload" class="avatar-edit-btn"><i class="fa-solid fa-camera"></i></label>
+        <input type="file" id="avatar-upload" accept="image/*">
+      </div>
+      <div class="user-info">
+        <input type="text" class="user-name" id="user-name" value="Atleta Futevôlei" placeholder="Seu Nome">
+        <div class="user-stats">
+          <div class="stat-item">
+            <i class="fa-solid fa-cake-candles"></i>
+            <input type="number" class="stat-input" id="user-age" placeholder="25"> anos
+          </div>
+          <div class="stat-item">
+            <i class="fa-solid fa-weight-scale"></i>
+            <input type="number" class="stat-input" id="user-weight" placeholder="80"> kg
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="workouts-container" id="workouts-container">
+      </main>
+
+    <div class="btn-reset" onclick="resetCheckboxes()">
+      <i class="fa-solid fa-rotate-right"></i> Resetar Semanas (Desmarcar Tudo)
+    </div>
+
+  </div>
+
+  <script>
+    // --- BANCO DE DADOS DOS TREINOS ---
+    const workouts = [
+      {
+        id: 'segunda', name: 'Segunda-feira', type: 'Perna 1 (Força Base)',
+        exercises: [
+          { id: 'seg-e1', name: 'Agachamento Livre', sets: '4 x 6 a 8', rest: '90s', hasWeight: true },
+          { id: 'seg-e2', name: 'Levantamento Terra/Stiff', sets: '4 x 8', rest: '90s', hasWeight: true },
+          { id: 'seg-e3', name: 'Leg Press 45º', sets: '3 x 10', rest: '60s', hasWeight: true },
+          { id: 'seg-e4', name: 'Elevação Pélvica', sets: '3 x 12', rest: '60s', hasWeight: true },
+          { id: 'seg-e5', name: 'Cadeira Abdutora', sets: '3 x 15', rest: '60s', hasWeight: true }
+        ]
+      },
+      {
+        id: 'terca', name: 'Terça-feira', type: 'Superiores 1 (Puxar)',
+        exercises: [
+          { id: 'ter-e1', name: 'Barra Fixa / Puxada Alta', sets: '4 x 8 a 10', rest: '90s', hasWeight: true },
+          { id: 'ter-e2', name: 'Remada Curvada', sets: '4 x 10', rest: '90s', hasWeight: true },
+          { id: 'ter-e3', name: 'Crucifixo Invertido (Superset)', sets: '3 x 15', rest: '0s', hasWeight: true },
+          { id: 'ter-e4', name: 'Rosca Direta (Superset)', sets: '3 x 12', rest: '60s', hasWeight: true }
+        ]
+      },
+      {
+        id: 'quarta', name: 'Quarta-feira', type: 'Perna 2 (Unilateral)',
+        exercises: [
+          { id: 'qua-e1', name: 'Agachamento Búlgaro', sets: '4 x 10 /perna', rest: 'Troca', hasWeight: true },
+          { id: 'qua-e2', name: 'Afundo Caminhando', sets: '3 x 12 /perna', rest: 'Troca', hasWeight: true },
+          { id: 'qua-e3', name: 'Cadeira Extensora Uni.', sets: '3 x 12 /perna', rest: 'Troca', hasWeight: true },
+          { id: 'qua-e4', name: 'Panturrilha em Pé Uni.', sets: '4 x 15 /perna', rest: 'Troca', hasWeight: true }
+        ]
+      },
+      {
+        id: 'quinta', name: 'Quinta-feira', type: 'Superiores 2 (Empurrar)',
+        exercises: [
+          { id: 'qui-e1', name: 'Supino Inclinado (Halter)', sets: '4 x 10', rest: '90s', hasWeight: true },
+          { id: 'qui-e2', name: 'Desenvolvimento Ombros', sets: '4 x 10', rest: '90s', hasWeight: true },
+          { id: 'qui-e3', name: 'Elevação Lateral (Superset)', sets: '3 x 15', rest: '0s', hasWeight: true },
+          { id: 'qui-e4', name: 'Tríceps na Polia (Superset)', sets: '3 x 12', rest: '60s', hasWeight: true }
+        ]
+      },
+      {
+        id: 'sexta', name: 'Sexta-feira', type: 'Perna 3 (Pliometria)',
+        exercises: [
+          { id: 'sex-e1', name: 'Box Jump (Salto Caixa)', sets: '4 x 5', rest: '60s', hasWeight: false },
+          { id: 'sex-e2', name: 'Kettlebell Swing', sets: '4 x 15', rest: '60s', hasWeight: true },
+          { id: 'sex-e3', name: 'Avanço Pliométrico', sets: '3 x 16 totais', rest: '60s', hasWeight: false },
+          { id: 'sex-e4', name: 'Panturrilha Sentado', sets: '4 x 15', rest: '60s', hasWeight: true }
+        ]
+      },
+      {
+        id: 'sabado', name: 'Sábado', type: 'Corrida Explosiva',
+        exercises: [
+          { id: 'sab-e1', name: 'Fartlek (1min forte / 1min fraco)', sets: '25 Minutos', rest: '-', hasWeight: false }
+        ]
+      },
+      {
+        id: 'domingo', name: 'Domingo', type: 'Corrida Recuperação',
+        exercises: [
+          { id: 'dom-e1', name: 'Trote Leve (Recuperativo)', sets: '30 a 40 Minutos', rest: '-', hasWeight: false }
+        ]
+      }
+    ];
+
+    const coreCircuit = [
+      { id: 'core-e1', name: 'Prancha OU Roda Abdominal', sets: '3 x 45s ou 10x', rest: '0s', hasWeight: false },
+      { id: 'core-e2', name: 'Russian Twist OU Rotação', sets: '3 x 20x', rest: '0s', hasWeight: true },
+      { id: 'core-e3', name: 'Abdominal Canivete', sets: '3 x 15x', rest: '30s (Fim da volta)', hasWeight: false }
+    ];
+
+    const warmup = [
+      { id: 'warm-e1', name: 'Cão de Caça (Torácica)', sets: '10x cada lado', rest: '-', hasWeight: false },
+      { id: 'warm-e2', name: 'Tornozelo na Parede', sets: '10x cada perna', rest: '-', hasWeight: false },
+      { id: 'warm-e3', name: 'Cócoras Profunda', sets: '1 Minuto', rest: '-', hasWeight: false },
+      { id: 'warm-e4', name: 'Homem-Aranha', sets: '10x alternando', rest: '-', hasWeight: false }
+    ];
+
+    // --- LÓGICA DE RENDERIZAÇÃO ---
+    const container = document.getElementById('workouts-container');
+
+    function renderWorkouts() {
+      workouts.forEach(day => {
+        let html = `
+          <div class="day-card" id="card-${day.id}">
+            <div class="day-header" onclick="toggleAccordion('card-${day.id}')">
+              <span>${day.name} <br><small style="color:var(--text-muted); font-size:0.8rem">${day.type}</small></span>
+              <i class="fa-solid fa-chevron-down"></i>
+            </div>
+            <div class="day-content">
+        `;
+
+        // Se for dia de semana (seg a sex), adiciona Aquecimento
+        if (['segunda', 'terca', 'quarta', 'quinta', 'sexta'].includes(day.id)) {
+          html += `<div class="section-title">Aquecimento (10 Min)</div>`;
+          warmup.forEach(ex => html += createExerciseRow(day.id, ex));
+        }
+
+        // Treino Principal
+        html += `<div class="section-title">Treino Principal</div>`;
+        day.exercises.forEach(ex => html += createExerciseRow(day.id, ex));
+
+        // Se for dia de semana, adiciona o Core
+        if (['segunda', 'terca', 'quarta', 'quinta', 'sexta'].includes(day.id)) {
+          html += `<div class="section-title">Core Diário (Circuito)</div>`;
+          coreCircuit.forEach(ex => html += createExerciseRow(day.id, ex));
+        }
+
+        html += `</div></div>`;
+        container.innerHTML += html;
+      });
+      
+      loadData(); // Carrega os dados salvos após renderizar
+    }
+
+    function createExerciseRow(dayId, ex) {
+      const uid = `${dayId}-${ex.id}`; // ID Único para salvar no LocalStorage
+      
+      let weightHTML = '';
+      if (ex.hasWeight) {
+        weightHTML = `
+          <div class="weight-tracker">
+            <span class="weight-label">Carga PR</span>
+            <div class="weight-input-wrapper">
+              <input type="number" class="weight-input param-input" data-id="${uid}-kg" placeholder="0">
+              <span class="weight-unit">kg</span>
+            </div>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="exercise-row">
+          <div class="custom-checkbox chk-param" data-id="${uid}-chk" onclick="toggleCheck(this)">
+            <i class="fa-solid fa-check"></i>
+          </div>
+          <div class="exercise-info">
+            <div class="ex-name">${ex.name}</div>
+            <div class="ex-details">${ex.sets} • Descanso: ${ex.rest}</div>
+          </div>
+          ${weightHTML}
+        </div>
+      `;
+    }
+
+    // --- FUNCIONALIDADES DO APP ---
+    function toggleAccordion(cardId) {
+      const card = document.getElementById(cardId);
+      card.classList.toggle('active');
+    }
+
+    function toggleCheck(element) {
+      element.classList.toggle('checked');
+      saveData(element.dataset.id, element.classList.contains('checked'));
+    }
+
+    function resetCheckboxes() {
+      if(confirm('Isso vai desmarcar todos os exercícios (os pesos registrados serão mantidos). Continuar?')) {
+        document.querySelectorAll('.custom-checkbox').forEach(chk => {
+          chk.classList.remove('checked');
+          saveData(chk.dataset.id, false);
+        });
+      }
+    }
+
+    // --- SALVAMENTO LOCAL (LOCALSTORAGE) ---
+    function saveData(key, value) {
+      localStorage.setItem('futevolei_' + key, value);
+    }
+
+    function loadData() {
+      // Carrega inputs de perfil
+      const nameEl = document.getElementById('user-name');
+      const ageEl = document.getElementById('user-age');
+      const weightEl = document.getElementById('user-weight');
+      const imgEl = document.getElementById('profile-img');
+
+      if (localStorage.getItem('futevolei_name')) nameEl.value = localStorage.getItem('futevolei_name');
+      if (localStorage.getItem('futevolei_age')) ageEl.value = localStorage.getItem('futevolei_age');
+      if (localStorage.getItem('futevolei_weight')) weightEl.value = localStorage.getItem('futevolei_weight');
+      if (localStorage.getItem('futevolei_avatar')) imgEl.src = localStorage.getItem('futevolei_avatar');
+
+      // Salva quando digita no perfil
+      nameEl.addEventListener('input', (e) => saveData('name', e.target.value));
+      ageEl.addEventListener('input', (e) => saveData('age', e.target.value));
+      weightEl.addEventListener('input', (e) => saveData('weight', e.target.value));
+
+      // Carrega checks e pesos dos exercícios
+      document.querySelectorAll('.chk-param').forEach(chk => {
+        if (localStorage.getItem('futevolei_' + chk.dataset.id) === 'true') {
+          chk.classList.add('checked');
+        }
+      });
+
+      document.querySelectorAll('.param-input').forEach(input => {
+        const savedWeight = localStorage.getItem('futevolei_' + input.dataset.id);
+        if (savedWeight) input.value = savedWeight;
+        
+        input.addEventListener('input', (e) => {
+          saveData(e.target.dataset.id, e.target.value);
+        });
+      });
+    }
+
+    // --- UPLOAD DE FOTO DE PERFIL ---
+    document.getElementById('avatar-upload').addEventListener('change', function(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const imgUrl = e.target.result;
+          document.getElementById('profile-img').src = imgUrl;
+          saveData('avatar', imgUrl);
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Inicia o App
+    renderWorkouts();
+  </script>
+</body>
+</html>

@@ -3,171 +3,261 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus Finance - Dashboard</title>
+    <title>Nexus Finance 2.0 | Mobile Ready</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div class="app-container">
-        <aside class="sidebar">
+    <div class="netflix-layout">
+        
+        <div class="sidebar-overlay" onclick="toggleMenu()"></div>
+
+        <nav class="sidebar">
             <div class="logo">
-                <i class="icon-logo">⚙️</i>
-                <span>NEXUS<span>FINANCE</span></span>
+                <i class="fa-solid fa-play"></i> NEXUS
+                <button class="mobile-close-btn" onclick="toggleMenu()"><i class="fa-solid fa-xmark"></i></button>
             </div>
-
-            <div class="filter-group">
-                <label>Ano</label>
-                <select id="filter-year">
-                    <option value="2026">2026</option>
-                    <option value="2025">2025</option>
-                </select>
-            </div>
-
-            <div class="filter-group">
-                <label>Mês</label>
-                <select id="filter-month">
-                    <option value="all">Ano Todo</option>
-                    <option value="01">Janeiro</option>
-                    <option value="02">Fevereiro</option>
-                    <option value="03">Março</option>
-                    <option value="04">Abril</option>
-                    <option value="05">Maio</option>
-                    <option value="06">Junho</option>
-                    <option value="07">Julho</option>
-                    <option value="08">Agosto</option>
-                    <option value="09">Setembro</option>
-                    <option value="10">Outubro</option>
-                    <option value="11">Novembro</option>
-                    <option value="12">Dezembro</option>
-                </select>
-            </div>
-
-            <div class="accounts-summary">
-                <div class="accounts-header">
-                    <span>Contas Correntes</span>
-                </div>
-                <ul id="accounts-list">
-                    </ul>
-            </div>
-            
-            <button class="btn-clear" onclick="clearData()">Limpar Dados</button>
-        </aside>
+            <ul class="nav-links">
+                <li class="active" onclick="navTo('dashboard')"><i class="fa-solid fa-house"></i> <span>Início</span></li>
+                <li onclick="navTo('checklist')"><i class="fa-solid fa-check-double"></i> <span>Checklist</span></li>
+                <li onclick="navTo('budgets')"><i class="fa-solid fa-chart-pie"></i> <span>Orçamentos</span></li>
+                <li onclick="navTo('goals')"><i class="fa-solid fa-bullseye"></i> <span>Metas / Patrimônio</span></li>
+                <li onclick="navTo('history')"><i class="fa-solid fa-list"></i> <span>Histórico</span></li>
+                <li onclick="navTo('settings')"><i class="fa-solid fa-gear"></i> <span>Configurações</span></li>
+            </ul>
+        </nav>
 
         <main class="main-content">
-            <header class="top-header">
-                <h2>Visão Geral do Patrimônio</h2>
-                <div class="date-display" id="date">--/--/----</div>
+            
+            <header class="top-nav">
+                <div class="mobile-nav-left">
+                    <button class="mobile-menu-btn" onclick="toggleMenu()"><i class="fa-solid fa-bars"></i></button>
+                    <div class="filter-controls">
+                        <select id="view-mode" onchange="updateFilters()">
+                            <option value="month">Mensal</option>
+                            <option value="year">Anual</option>
+                            <option value="all">Geral</option>
+                        </select>
+                        <select id="filter-year" onchange="refreshApp()"></select>
+                        <select id="filter-month" onchange="refreshApp()">
+                            <option value="01">Jan</option><option value="02">Fev</option><option value="03">Mar</option>
+                            <option value="04">Abr</option><option value="05">Mai</option><option value="06">Jun</option>
+                            <option value="07">Jul</option><option value="08">Ago</option><option value="09">Set</option>
+                            <option value="10">Out</option><option value="11">Nov</option><option value="12">Dez</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="top-actions">
+                    <button class="btn-main-launch" onclick="openModal('modal-transaction')"><i class="fa-solid fa-plus"></i> <span class="hide-mobile">Lançar</span></button>
+                    <img src="https://ui-avatars.com/api/?name=Admin&background=E50914&color=fff" alt="Perfil" class="profile-pic">
+                </div>
             </header>
 
-            <div class="kpi-grid">
-                <div class="kpi-card card-orange">
-                    <div class="kpi-info">
-                        <span>Saldo Conta Corrente</span>
-                        <h3 id="total-balance">R$ 0,00</h3>
-                    </div>
-                </div>
-                <div class="kpi-card card-dark">
-                    <div class="kpi-info">
-                        <span>Entradas no Período</span>
-                        <h3 id="total-income" style="color: var(--accent-cyan)">R$ 0,00</h3>
-                    </div>
-                </div>
-                <div class="kpi-card card-dark">
-                    <div class="kpi-info">
-                        <span>Despesas no Período</span>
-                        <h3 id="total-expense" style="color: var(--accent-red)">R$ 0,00</h3>
+            <section id="sec-dashboard" class="page-section active">
+                <div class="hero-balance">
+                    <p class="subtitle">Saldo em Conta Corrente</p>
+                    <div class="balance-wrapper">
+                        <h1 id="main-balance">R$ 0,00</h1>
+                        <button id="btn-eye" onclick="toggleEye()"><i class="fa-solid fa-eye"></i></button>
                     </div>
                 </div>
 
-                <div class="kpi-card card-dark">
-                    <div class="kpi-info">
-                        <span>Poupança (Acumulado)</span>
-                        <h3 id="total-poupanca" style="color: var(--accent-green)">R$ 0,00</h3>
-                    </div>
+                <div id="alerts-container"></div>
+
+                <div class="rail">
+                    <h2 class="rail-title">Sua Carteira</h2>
+                    <div class="rail-cards" id="accounts-rail"></div>
                 </div>
-                <div class="kpi-card card-dark">
-                    <div class="kpi-info">
-                        <span>Ações / FIIs (Acumulado)</span>
-                        <h3 id="total-investimentos" style="color: #b533ff">R$ 0,00</h3>
-                    </div>
-                </div>
-                
-                <div class="kpi-card card-dark" style="border-color: var(--accent-orange); position: relative;">
-                    <div class="kpi-info" style="width: 100%;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                            <span id="budget-label">Limite Mensal Disponível</span>
-                            
-                            <div id="annual-budget-config" style="display: none;">
-                                <label style="font-size:0.7rem; color:var(--text-muted); margin-right:5px;">Meta Anual R$</label>
-                                <input type="number" id="annual-budget-input" class="budget-input">
-                            </div>
+
+                <div class="rail">
+                    <h2 class="rail-title" id="chart-title-main">Análise do Período</h2>
+                    <div class="rail-cards charts-rail">
+                        <div class="chart-card large-chart">
+                            <h3>Evolução de Caixa</h3>
+                            <div class="canvas-wrap"><canvas id="evolucaoChart"></canvas></div>
                         </div>
-                        
-                        <h3 id="budget-left">R$ 0,00</h3>
-                        <small id="budget-sub" style="color: var(--text-muted); font-size: 0.75rem;">Limite Máx: R$ 2.100</small>
+                    </div>
+                    <div class="rail-cards charts-rail" style="margin-top: 20px;">
+                        <div class="chart-card">
+                            <h3>Distribuição de Patrimônio</h3>
+                            <div class="canvas-wrap"><canvas id="patrimonioChart"></canvas></div>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Top Despesas</h3>
+                            <div class="canvas-wrap"><canvas id="despesasChart"></canvas></div>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <div class="middle-grid">
-                <div class="chart-box">
-                    <h3>Top Entradas</h3>
-                    <div class="canvas-container"><canvas id="barChart"></canvas></div>
+            <section id="sec-checklist" class="page-section">
+                <div class="page-header-flex">
+                    <div>
+                        <h2 class="page-title">Contas Fixas</h2>
+                        <p class="page-subtitle">Checklist de obrigações do mês.</p>
+                    </div>
+                    <button class="btn-add-new" onclick="openModal('modal-checklist')"><i class="fa-solid fa-plus"></i> <span class="hide-mobile">Nova Conta</span></button>
                 </div>
-                <div class="chart-box">
-                    <h3>Top Despesas</h3>
-                    <div class="canvas-container"><canvas id="doughnutChart"></canvas></div>
-                </div>
-            </div>
+                <div class="checklist-container" id="checklist-grid"></div>
+            </section>
 
-            <div class="bottom-grid">
-                <div class="chart-box">
-                    <h3>Evolução do Ano Inteiro (Despesas vs Entradas)</h3>
-                    <div class="canvas-container"><canvas id="mixedChart"></canvas></div>
+            <section id="sec-budgets" class="page-section">
+                <div class="page-header-flex">
+                    <div>
+                        <h2 class="page-title">Orçamentos</h2>
+                        <p class="page-subtitle">Limites de gastos com alertas.</p>
+                    </div>
+                    <button class="btn-add-new" onclick="openModal('modal-budget')"><i class="fa-solid fa-plus"></i> <span class="hide-mobile">Novo Orçamento</span></button>
                 </div>
-                
-                <div class="action-box">
-                    <h3>Nova Transação</h3>
-                    <form id="finance-form">
-                        <input type="text" id="desc" placeholder="Descrição (Ex: Salário, Jantar...)" required>
-                        <div class="input-row">
-                            <input type="number" id="amount" placeholder="Valor" step="0.01" required>
-                            <input type="date" id="t-date" required>
-                        </div>
-                        <div class="input-row">
-                            <select id="type">
-                                <option value="income">Entrada (+)</option>
-                                <option value="expense">Saída (-)</option>
-                            </select>
-                            <select id="category">
-                                <option value="Salário">Salário</option>
-                                <option value="Moradia">Moradia</option>
-                                <option value="Alimentação">Alimentação</option>
-                                <option value="Transporte">Transporte</option>
-                                <option value="Lazer">Lazer</option>
-                                <option value="Saúde">Saúde</option>
-                                <option value="Poupança">➡️ Guardar: Poupança</option>
-                                <option value="Investimentos">➡️ Guardar: Ações/FII</option>
-                                <option value="Outros">Outros</option>
-                            </select>
-                        </div>
-                        <select id="account-select">
-                            <option value="CAIXXXA">CAIXXXA</option>
-                            <option value="BUBANK">BUBANK</option>
-                            <option value="WISA">WISA</option>
-                        </select>
-                        <button type="submit" class="btn-submit">Registrar Transação</button>
-                    </form>
+                <div class="grid-cards" id="budgets-grid"></div>
+            </section>
 
-                    <div class="history-section">
-                        <h4>Histórico (Período Selecionado)</h4>
-                        <ul id="transaction-list"></ul>
+            <section id="sec-goals" class="page-section">
+                <div class="page-header-flex">
+                    <div>
+                        <h2 class="page-title">Metas</h2>
+                        <p class="page-subtitle">Gamifique seus investimentos.</p>
+                    </div>
+                    <button class="btn-add-new" onclick="openModal('modal-goal')"><i class="fa-solid fa-plus"></i> <span class="hide-mobile">Nova Meta</span></button>
+                </div>
+                <div class="grid-cards" id="goals-grid"></div>
+            </section>
+
+            <section id="sec-history" class="page-section">
+                <h2 class="page-title">Histórico</h2>
+                <div class="table-container">
+                    <table class="netflix-table">
+                        <thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Conta</th><th>Valor</th><th>Ação</th></tr></thead>
+                        <tbody id="history-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="sec-settings" class="page-section">
+                <h2 class="page-title">Configurações</h2>
+                <div class="settings-grid">
+                    <div class="settings-card">
+                        <h3>Contas Bancárias</h3>
+                        <ul id="settings-accounts-list" class="simple-list"></ul>
+                        <form id="form-account" class="inline-form" style="margin-top:15px;">
+                            <input type="text" id="cfg-account-name" placeholder="Nova conta..." required>
+                            <button type="submit" class="btn-submit">Adicionar</button>
+                        </form>
+                    </div>
+                    <div class="settings-card danger-zone">
+                        <h3>Zona de Perigo</h3>
+                        <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:15px;">Cuidado: Apagar os dados é irreversível.</p>
+                        <button class="btn-submit btn-danger" onclick="hardReset()">Zerar Todo o Sistema</button>
                     </div>
                 </div>
-            </div>
+            </section>
+
         </main>
     </div>
+
+    <div id="modal-transaction" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('modal-transaction')"><i class="fa-solid fa-xmark"></i></button>
+            <h2>Lançamento</h2>
+            <form id="form-transaction">
+                <div class="form-group">
+                    <label>Descrição</label>
+                    <input type="text" id="t-desc" placeholder="Ex: Ifood, Gasolina, Luz..." required autocomplete="off">
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Valor (R$)</label><input type="number" id="t-amount" step="0.01" required></div>
+                    <div class="form-group"><label>Data</label><input type="date" id="t-date" required></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tipo</label>
+                        <select id="t-type">
+                            <option value="expense">Saída (-)</option>
+                            <option value="income">Entrada (+)</option>
+                            <option value="transfer">Guardar (Meta)</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Categoria / Meta</label><select id="t-category" required></select></div>
+                </div>
+                <div class="form-group"><label>Conta Origem/Destino</label><select id="t-account" required></select></div>
+                <button type="submit" class="btn-submit">Registrar</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-pay-check" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('modal-pay-check')"><i class="fa-solid fa-xmark"></i></button>
+            <h2>Confirmar Pagamento</h2>
+            <p>Deseja marcar <strong><span id="pay-name"></span></strong> como pago?</p>
+            <form id="form-pay-check" style="margin-top: 20px;">
+                <div class="form-row">
+                    <div class="form-group"><label>Valor (R$)</label><input type="number" id="pay-amount" step="0.01" required></div>
+                    <div class="form-group"><label>Data</label><input type="date" id="pay-date" required></div>
+                </div>
+                <div class="form-group"><label>Debitar de</label><select id="pay-account" required></select></div>
+                <input type="hidden" id="pay-id">
+                <button type="submit" class="btn-submit" style="background:var(--green-money)">Confirmar e Lançar</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-checklist" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('modal-checklist')"><i class="fa-solid fa-xmark"></i></button>
+            <h2>Nova Conta Fixa</h2>
+            <form id="form-checklist">
+                <div class="form-group"><label>Descrição</label><input type="text" id="c-name" required></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Valor</label><input type="number" id="c-amount" step="0.01" required></div>
+                    <div class="form-group"><label>Vencimento (Dia)</label><input type="number" id="c-day" min="1" max="31" required></div>
+                </div>
+                <div class="form-group"><label>Categoria</label><select id="c-category" required></select></div>
+                <button type="submit" class="btn-submit">Adicionar</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-budget" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('modal-budget')"><i class="fa-solid fa-xmark"></i></button>
+            <h2>Novo Orçamento</h2>
+            <form id="form-budget">
+                <div class="form-group"><label>Categoria</label><input type="text" id="b-name" required></div>
+                <div class="form-group"><label>Limite Mensal</label><input type="number" id="b-limit" step="0.01" required></div>
+                <div class="form-group"><label>Palavras-Chave (vírgula)</label><input type="text" id="b-keywords"></div>
+                <button type="submit" class="btn-submit">Criar</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-goal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('modal-goal')"><i class="fa-solid fa-xmark"></i></button>
+            <h2>Nova Meta</h2>
+            <form id="form-goal">
+                <div class="form-group"><label>Nome</label><input type="text" id="g-name" required></div>
+                <div class="form-group"><label>Objetivo Final (R$)</label><input type="number" id="g-target" step="0.01" required></div>
+                <button type="submit" class="btn-submit">Criar</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-justification" class="modal-overlay">
+        <div class="modal-content warning-content">
+            <i class="fa-solid fa-triangle-exclamation warning-icon"></i>
+            <h2>Limite Excedido!</h2>
+            <p>Orçamento de <strong id="j-category-name">Categoria</strong> estourado.</p>
+            <form id="form-justification">
+                <div class="form-group"><textarea id="j-reason" rows="3" placeholder="Justificativa..." required></textarea></div>
+                <button type="submit" class="btn-submit btn-danger">Assumir e Salvar</button>
+                <button type="button" class="btn-cancel" onclick="cancelJustification()">Cancelar Lançamento</button>
+            </form>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
