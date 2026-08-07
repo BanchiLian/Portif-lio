@@ -4,7 +4,8 @@
   "private": true,
   "description": "Portfólio pessoal de Elian Mori",
   "scripts": {
-    "validate": "node scripts/validate-js.js"
+    "validate": "node scripts/validate-js.js",
+    "qa": "python scripts/qa_browser_test.py"
   },
   "engines": {
     "node": ">=18"

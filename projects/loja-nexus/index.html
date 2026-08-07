@@ -335,6 +335,7 @@
     };
 
     function saveCart() { localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart)); }
+    function esc(value) { const div = document.createElement('div'); div.textContent = String(value ?? ''); return div.innerHTML; }
     function productById(id) { return products.find(product => product.id === id); }
     function cartQuantity() { return cart.reduce((total, item) => total + item.quantity, 0); }
     function cartSubtotal() { return cart.reduce((total, item) => total + productById(item.id).price * item.quantity, 0); }
@@ -368,7 +369,7 @@
       elements.productsGrid.replaceChildren(...visibleProducts.map(product => {
         const card = document.createElement('article');
         card.className = 'product-card';
-        card.innerHTML = `<div class="product-media"><img class="product-image" src="${product.image}" alt="${product.name}" loading="lazy"><span class="product-badge">${product.badge}</span></div><div class="product-content"><span class="product-category">${product.category}</span><h3 class="product-title">${product.name}</h3><p class="product-spec">${product.spec}</p><div class="price-row"><span class="product-price">${currency.format(product.price)}</span><span class="old-price">${currency.format(product.oldPrice)}</span></div><button class="add-button" type="button">Adicionar ao orçamento</button></div>`;
+        card.innerHTML = `<div class="product-media"><img class="product-image" src="${esc(product.image)}" alt="${esc(product.name)}" loading="lazy"><span class="product-badge">${esc(product.badge)}</span></div><div class="product-content"><span class="product-category">${esc(product.category)}</span><h3 class="product-title">${esc(product.name)}</h3><p class="product-spec">${esc(product.spec)}</p><div class="price-row"><span class="product-price">${currency.format(product.price)}</span><span class="old-price">${currency.format(product.oldPrice)}</span></div><button class="add-button" type="button">Adicionar ao orçamento</button></div>`;
         const image = card.querySelector('img');
         image.addEventListener('error', () => imageFallback(image));
         card.querySelector('button').addEventListener('click', () => addToCart(product.id));
@@ -400,7 +401,7 @@
         const product = productById(item.id);
         const row = document.createElement('article');
         row.className = 'cart-item';
-        row.innerHTML = `<img src="${product.image}" alt=""><div><h3>${product.name}</h3><span class="cart-item-price">${currency.format(product.price * item.quantity)}</span><div class="quantity"><button type="button" aria-label="Diminuir quantidade">−</button><span>${item.quantity}</span><button type="button" aria-label="Aumentar quantidade">+</button></div></div><button class="remove-button" type="button">Remover</button>`;
+        row.innerHTML = `<img src="${esc(product.image)}" alt=""><div><h3>${esc(product.name)}</h3><span class="cart-item-price">${currency.format(product.price * item.quantity)}</span><div class="quantity"><button type="button" aria-label="Diminuir quantidade">−</button><span>${item.quantity}</span><button type="button" aria-label="Aumentar quantidade">+</button></div></div><button class="remove-button" type="button">Remover</button>`;
         const [decrease, increase] = row.querySelectorAll('.quantity button');
         decrease.addEventListener('click', () => changeQuantity(item.id, -1));
         increase.addEventListener('click', () => changeQuantity(item.id, 1));

@@ -9,3 +9,8 @@ node_modules/
 dist/
 coverage/
 *.log
+
+# Artefatos gerados pelo script de QA (scripts/qa_browser_test.py)
+scripts/qa-screenshots/
+__pycache__/
+*.pyc

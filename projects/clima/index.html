@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -97,6 +97,8 @@
             transition: transform 0.2s, background 0.2s, box-shadow 0.2s; cursor: pointer;
         }
         .city-card:hover, .city-card:focus-visible { transform: translateY(-2px); background: rgba(255,255,255,0.22); box-shadow: 0 10px 25px rgba(0,0,0,0.14); outline: none; }
+        /* Reserva espaco para o .delete-btn (canto superior esquerdo) nao cobrir o titulo */
+        .city-card > div:first-of-type { padding-left: 26px; }
         .city-card h2 { font-size: 22px; font-weight: 600; }
         .city-card p { font-size: 12px; opacity: 0.9; }
         .city-card .temp { font-size: 40px; font-weight: 300; display: flex; align-items: center; gap: 8px; }
@@ -413,7 +415,10 @@
         }
 
         async function useCurrentLocation() {
-            if (!navigator.geolocation) return;
+            if (!navigator.geolocation) {
+                document.getElementById('detCond').textContent = 'Geolocalização não suportada neste navegador.';
+                return;
+            }
             navigator.geolocation.getCurrentPosition(async position => {
                 const city = { name: 'Minha localização', state: '', country: '', latitude: position.coords.latitude, longitude: position.coords.longitude };
                 await updateDetails(city);

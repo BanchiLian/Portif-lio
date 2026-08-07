@@ -18,6 +18,7 @@ Entre os principais recursos estão:
 - projetos independentes organizados dentro do mesmo repositório;
 - aplicações com persistência local, consumo de APIs e funcionamento offline;
 - validação automática da sintaxe JavaScript com Node.js;
+- testes de ponta a ponta em navegador real (Playwright/Python) cobrindo navegação, formulários, temas e os quatro sub-projetos;
 - publicação estática por meio do GitHub Pages.
 
 ## Tecnologias e ferramentas
@@ -31,10 +32,10 @@ Entre os principais recursos estão:
 | Integrações | Fetch API, APIs REST e WhatsApp |
 | Visualização | Chart.js |
 | Aplicação instalável | Web App Manifest, Service Worker e Cache API |
-| Qualidade | Node.js e parser automático de JavaScript |
+| Qualidade | Node.js (parser de sintaxe) e Python + Playwright (QA de ponta a ponta em navegador real) |
 | Publicação | Git, GitHub e GitHub Pages |
 
-O portfólio não depende de frameworks ou de um processo de build para funcionar. O Node.js é utilizado somente no ambiente de desenvolvimento para validar os códigos antes da publicação.
+O portfólio não depende de frameworks ou de um processo de build para funcionar. Node.js e Python são utilizados somente no ambiente de desenvolvimento, para validar e testar os códigos antes da publicação.
 
 ## Projetos
 
@@ -110,6 +111,10 @@ Recursos disponíveis:
 ```text
 .
 |-- assets/
+|   |-- css/
+|   |   `-- style.css
+|   |-- js/
+|   |   `-- main.js
 |   `-- images/
 |       |-- favicon.svg
 |       |-- perfil.jpg
@@ -128,6 +133,7 @@ Recursos disponíveis:
 |   `-- loja-nexus/
 |       `-- index.html
 |-- scripts/
+|   |-- qa_browser_test.py
 |   `-- validate-js.js
 |-- .gitignore
 |-- .nojekyll
@@ -165,6 +171,25 @@ npm run validate
 
 O comando informa cada bloco analisado e encerra com erro caso encontre JavaScript com sintaxe inválida. Nenhuma dependência precisa ser instalada para executar a validação.
 
+## Testes de ponta a ponta em navegador (QA)
+
+Além da validação de sintaxe, o repositório tem um script de QA (`scripts/qa_browser_test.py`) que abre um navegador Chromium real via [Playwright](https://playwright.dev/python/) e testa a página principal e os quatro sub-projetos como um usuário faria: navegação entre seções, alternância de tema, abertura de modais, preenchimento de formulários, integração com WhatsApp, carrinho de compras, lançamentos financeiros e o plano de treino.
+
+Requer Python 3.10+ e o navegador do Playwright instalados uma única vez:
+
+```bash
+pip install playwright
+playwright install chromium
+```
+
+Para rodar os testes:
+
+```bash
+python scripts/qa_browser_test.py
+```
+
+O script sobe um servidor HTTP local descartável, roda os testes e imprime um relatório com `PASS`/`WARN`/`FAIL` por verificação, além de salvar uma screenshot de cada página em `scripts/qa-screenshots/` para conferência visual. Ele encerra com código de saída diferente de zero se alguma verificação falhar — falhas de rede em hosts externos (fontes, imagens de banco de imagens, APIs de clima) são reportadas como aviso, não como falha, já que dependem de conectividade do ambiente e não do código do portfólio.
+
 ## Persistência e privacidade
 
 Os aplicativos armazenam informações diretamente no navegador usando `localStorage`. No Nexus Finance, lançamentos também podem ser exportados para CSV e todos os dados podem ser preservados em um backup JSON.
@@ -179,15 +204,17 @@ Antes de publicar uma alteração, o fluxo recomendado é:
 
 ```bash
 npm run validate
+python scripts/qa_browser_test.py
 git status
 ```
 
 ## Melhorias futuras
 
+- substituir as imagens ilustrativas (banco de imagens) dos cards de projeto na página principal por capturas de tela reais de cada aplicação;
 - criar estudos de caso detalhados para os principais projetos;
 - disponibilizar o currículo em PDF;
 - adicionar uma versão do conteúdo em inglês;
-- incluir testes automatizados de acessibilidade;
+- incluir testes automatizados de acessibilidade (ex.: axe-core);
 - avaliar sincronização autenticada do Nexus Finance com serviços de planilha em nuvem.
 
 ## Autor
