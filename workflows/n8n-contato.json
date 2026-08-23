@@ -1,0 +1,198 @@
+{
+  "name": "Portfolio - Formulario de contato",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "portfolio-contato",
+        "responseMode": "responseNode",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type"
+              }
+            ]
+          }
+        }
+      },
+      "id": "1",
+      "name": "Receber contato",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        260,
+        300
+      ],
+      "webhookId": "portfolio-contato"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body ?? $json;\nconst name = String(body.name ?? '').trim();\nconst email = String(body.email ?? '').trim();\nconst message = String(body.message ?? '').trim();\n\nconst errors = [];\nif (name.length < 2 || name.length > 120) errors.push('Nome invalido.');\nif (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) errors.push('E-mail invalido.');\nif (message.length < 5 || message.length > 5000) errors.push('Mensagem invalida.');\n\nreturn [{\n  json: {\n    valid: errors.length === 0,\n    errors,\n    name,\n    email,\n    message,\n    receivedAt: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "2",
+      "name": "Validar dados",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        500,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "valid-contact",
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "3",
+      "name": "Dados validos?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        740,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "portfolio@exemplo.com",
+        "toEmail": "seu-email@exemplo.com",
+        "subject": "Novo contato pelo portfolio: {{ $json.name }}",
+        "emailFormat": "html",
+        "html": "<h2>Novo contato pelo portfolio</h2><p><strong>Nome:</strong> {{ $json.name }}</p><p><strong>E-mail:</strong> {{ $json.email }}</p><p><strong>Mensagem:</strong></p><p>{{ $json.message }}</p><p><small>Recebido em {{ $json.receivedAt }}</small></p>",
+        "options": {}
+      },
+      "id": "4",
+      "name": "Enviar e-mail",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        980,
+        220
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "CONFIGURE_NO_N8N",
+          "name": "SMTP da caixa de entrada"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"success\":true,\"message\":\"Mensagem enviada com sucesso.\"}",
+        "options": {}
+      },
+      "id": "5",
+      "name": "Responder sucesso",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1220,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: false, errors: $json.errors }) }}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "6",
+      "name": "Responder erro",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        980,
+        380
+      ]
+    }
+  ],
+  "connections": {
+    "Receber contato": {
+      "main": [
+        [
+          {
+            "node": "Validar dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar dados": {
+      "main": [
+        [
+          {
+            "node": "Dados validos?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dados validos?": {
+      "main": [
+        [
+          {
+            "node": "Enviar e-mail",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder erro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar e-mail": {
+      "main": [
+        [
+          {
+            "node": "Responder sucesso",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "portfolio-contato-v1",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

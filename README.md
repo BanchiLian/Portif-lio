@@ -135,6 +135,8 @@ Recursos disponíveis:
 |-- scripts/
 |   |-- qa_browser_test.py
 |   `-- validate-js.js
+|-- workflows/
+|   `-- n8n-contato.json
 |-- .gitignore
 |-- .nojekyll
 |-- index.html
@@ -143,6 +145,26 @@ Recursos disponíveis:
 ```
 
 Cada diretório em `projects/` representa uma demonstração independente, acessível pela seção de projetos do portfólio.
+
+## Workflow n8n do formulário de contato
+
+O arquivo `workflows/n8n-contato.json` contém um workflow importável no n8n. Ele recebe `name`, `email` e `message` por `POST`, valida os campos, envia a mensagem por SMTP e responde em JSON.
+
+Para configurar:
+
+1. No n8n, use **Import from File** e selecione `workflows/n8n-contato.json`.
+2. Crie uma credencial SMTP no nó **Enviar e-mail** e substitua `portfolio@exemplo.com` e `seu-email@exemplo.com` pelos endereços reais.
+3. Ative o workflow e use a URL de produção do webhook: `/webhook/portfolio-contato`.
+
+Exemplo de requisição:
+
+```bash
+curl -X POST https://SEU-N8N/webhook/portfolio-contato \
+	-H "Content-Type: application/json" \
+	-d '{"name":"Maria","email":"maria@example.com","message":"Olá! Gostaria de conversar sobre um projeto."}'
+```
+
+O formulário atual continua abrindo o WhatsApp. Para encaminhá-lo ao n8n, será necessário trocar o endpoint no `assets/js/main.js` pela URL pública do seu webhook.
 
 ## Executar localmente
 
