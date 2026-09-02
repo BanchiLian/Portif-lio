@@ -2,9 +2,20 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#090909">
+  <meta name="description" content="Painel financeiro pessoal: contas, contas fixas, orçamentos, metas, recorrentes e relatórios. Funciona offline e pode ser instalado como app.">
+  <meta name="color-scheme" content="dark">
   <title>Nexus Finance</title>
+
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" type="image/svg+xml" href="../../assets/images/nexus-finance-icon.svg">
+  <link rel="apple-touch-icon" href="../../assets/images/nexus-finance-icon.svg">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Nexus Finance">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -18,12 +29,13 @@
     <aside class="sidebar" aria-label="Menu principal">
       <a class="brand" href="#dashboard" aria-label="Nexus Finance"><span class="brand-mark">N</span><span>NEXUS</span></a>
       <nav class="nav-list">
-        <button class="nav-item active" data-section="dashboard"><span>⌂</span>Visão geral</button>
-        <button class="nav-item" data-section="bills"><span>✓</span>Contas fixas</button>
-        <button class="nav-item" data-section="budgets"><span>◔</span>Orçamentos</button>
-        <button class="nav-item" data-section="goals"><span>◎</span>Metas</button>
-        <button class="nav-item" data-section="history"><span>≡</span>Lançamentos</button>
-        <button class="nav-item" data-section="settings"><span>⚙</span>Configurações</button>
+        <button class="nav-item active" data-section="dashboard" aria-current="page"><span aria-hidden="true">⌂</span>Visão geral</button>
+        <button class="nav-item" data-section="bills"><span aria-hidden="true">✓</span>Contas fixas</button>
+        <button class="nav-item" data-section="recurring"><span aria-hidden="true">↻</span>Recorrentes</button>
+        <button class="nav-item" data-section="budgets"><span aria-hidden="true">◔</span>Orçamentos</button>
+        <button class="nav-item" data-section="goals"><span aria-hidden="true">◎</span>Metas</button>
+        <button class="nav-item" data-section="history"><span aria-hidden="true">≡</span>Lançamentos</button>
+        <button class="nav-item" data-section="settings"><span aria-hidden="true">⚙</span>Configurações</button>
       </nav>
       <p class="storage-note">Dados salvos neste navegador</p>
     </aside>
@@ -41,7 +53,7 @@
 
       <section id="dashboard" class="page active">
         <div class="hero">
-          <div><p class="eyebrow">SALDO DISPONÍVEL</p><div class="balance-line"><h1 id="main-balance">R$ 0,00</h1><button id="privacy-button" class="icon-button" aria-label="Ocultar valores">◉</button></div><p id="period-label" class="muted"></p></div>
+          <div><p class="eyebrow">SALDO DISPONÍVEL</p><div class="balance-line"><h1 id="main-balance">R$ 0,00</h1><button id="privacy-button" class="icon-button" aria-label="Ocultar valores" aria-pressed="false">◉</button></div><p id="period-label" class="muted"></p></div>
           <button class="secondary-button" data-open="transaction-modal">Registrar agora</button>
         </div>
         <div id="alerts" aria-live="polite"></div>
@@ -49,6 +61,7 @@
           <article class="kpi"><span>Entradas</span><strong id="kpi-income" class="positive">R$ 0,00</strong></article>
           <article class="kpi"><span>Saídas</span><strong id="kpi-expense" class="negative">R$ 0,00</strong></article>
           <article class="kpi"><span>Resultado do período</span><strong id="kpi-result">R$ 0,00</strong></article>
+          <article class="kpi"><span>Reservado em metas</span><strong id="kpi-goals" class="blue">R$ 0,00</strong></article>
           <article class="kpi"><span>Contas fixas pendentes</span><strong id="kpi-pending">R$ 0,00</strong></article>
         </div>
         <div class="section-heading"><div><p class="eyebrow">CARTEIRA</p><h2>Suas contas</h2></div></div>
@@ -60,23 +73,174 @@
         </div>
       </section>
 
-      <section id="bills" class="page"><div class="page-header"><div><p class="eyebrow">ROTINA MENSAL</p><h1>Contas fixas</h1><p class="muted">Acompanhe vencimentos e registre pagamentos sem duplicidade.</p></div><button class="secondary-button" data-open="bill-modal">+ Nova conta</button></div><div id="bills-grid" class="card-grid"></div></section>
-      <section id="budgets" class="page"><div class="page-header"><div><p class="eyebrow">CONTROLE</p><h1>Orçamentos</h1><p class="muted">Defina limites mensais por categoria.</p></div><button class="secondary-button" data-open="budget-modal">+ Novo orçamento</button></div><div id="budgets-grid" class="card-grid"></div></section>
-      <section id="goals" class="page"><div class="page-header"><div><p class="eyebrow">PATRIMÔNIO</p><h1>Metas</h1><p class="muted">Separe valores e acompanhe o progresso.</p></div><button class="secondary-button" data-open="goal-modal">+ Nova meta</button></div><div id="goals-grid" class="card-grid"></div></section>
-      <section id="history" class="page"><div class="page-header"><div><p class="eyebrow">MOVIMENTAÇÕES</p><h1>Lançamentos</h1></div><button class="secondary-button" data-open="transaction-modal">+ Novo</button></div><div class="toolbar"><input id="history-search" type="search" placeholder="Buscar descrição, categoria ou conta"><select id="history-type"><option value="all">Todos os tipos</option><option value="income">Entradas</option><option value="expense">Saídas</option><option value="goal">Metas</option></select></div><div class="table-wrap"><table><thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Conta</th><th>Tipo</th><th>Valor</th><th></th></tr></thead><tbody id="history-body"></tbody></table></div></section>
-      <section id="settings" class="page"><div class="page-header"><div><p class="eyebrow">PREFERÊNCIAS</p><h1>Configurações</h1><p class="muted">Organize suas contas e mantenha cópias dos dados.</p></div></div><div class="settings-grid">
-        <article class="panel"><h3>Contas e saldos iniciais</h3><p class="muted small">O saldo inicial é somado aos lançamentos da conta.</p><div id="account-list" class="settings-list"></div><form id="account-form" class="stack-form"><label>Nome<input id="account-name" required maxlength="40" placeholder="Ex.: Conta principal"></label><label>Saldo inicial<input id="account-opening" type="number" step="0.01" value="0" required></label><button class="primary-button" type="submit">Adicionar conta</button></form></article>
-        <article class="panel"><h3>Excel e segurança</h3><p class="muted small">Use CSV para editar lançamentos no Excel. O backup JSON preserva todas as configurações.</p><div class="button-stack"><button class="secondary-button" id="csv-template">Baixar modelo CSV</button><button class="secondary-button" id="csv-export">Exportar lançamentos CSV</button><button class="secondary-button" id="csv-import">Importar CSV do Excel</button><button class="secondary-button" id="backup-export">Baixar backup completo</button><button class="secondary-button" id="backup-import">Restaurar backup</button></div><input id="csv-file" type="file" accept=".csv,text/csv" hidden><input id="backup-file" type="file" accept=".json,application/json" hidden><p id="file-status" class="status" aria-live="polite"></p></article>
-        <article class="panel danger"><h3>Zona de cuidado</h3><p class="muted small">Remove apenas os dados deste aplicativo neste navegador.</p><button class="danger-button" id="reset-app">Apagar dados do Nexus Finance</button></article>
-      </div></section>
+      <section id="bills" class="page">
+        <div class="page-header"><div><p class="eyebrow">ROTINA MENSAL</p><h1>Contas fixas</h1><p class="muted">Acompanhe vencimentos e registre pagamentos sem duplicidade.</p></div><button class="secondary-button" data-open="bill-modal">+ Nova conta</button></div>
+        <div id="bills-grid" class="card-grid"></div>
+      </section>
+
+      <section id="recurring" class="page">
+        <div class="page-header"><div><p class="eyebrow">AUTOMÁTICO</p><h1>Lançamentos recorrentes</h1><p class="muted">Salário, assinaturas e outros valores que se repetem todo mês são lançados sozinhos.</p></div><button class="secondary-button" data-open="recurring-modal">+ Novo recorrente</button></div>
+        <div id="recurring-grid" class="card-grid"></div>
+      </section>
+
+      <section id="budgets" class="page">
+        <div class="page-header"><div><p class="eyebrow">CONTROLE</p><h1>Orçamentos</h1><p class="muted">Defina limites mensais por categoria.</p></div><button class="secondary-button" data-open="budget-modal">+ Novo orçamento</button></div>
+        <div id="budgets-grid" class="card-grid"></div>
+      </section>
+
+      <section id="goals" class="page">
+        <div class="page-header"><div><p class="eyebrow">PATRIMÔNIO</p><h1>Metas</h1><p class="muted">Separe valores, acompanhe o progresso e resgate quando precisar.</p></div><button class="secondary-button" data-open="goal-modal">+ Nova meta</button></div>
+        <div id="goals-grid" class="card-grid"></div>
+      </section>
+
+      <section id="history" class="page">
+        <div class="page-header"><div><p class="eyebrow">MOVIMENTAÇÕES</p><h1>Lançamentos</h1></div><div class="header-actions"><button class="secondary-button" id="print-report">Relatório PDF</button><button class="secondary-button" data-open="transaction-modal">+ Novo</button></div></div>
+        <div class="toolbar">
+          <input id="history-search" type="search" placeholder="Buscar descrição, categoria ou conta">
+          <select id="history-type"><option value="all">Todos os tipos</option><option value="income">Entradas</option><option value="expense">Saídas</option><option value="goal">Metas</option><option value="transfer">Transferências</option></select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Conta</th><th>Tipo</th><th>Valor</th><th></th></tr></thead>
+            <tbody id="history-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="settings" class="page">
+        <div class="page-header"><div><p class="eyebrow">PREFERÊNCIAS</p><h1>Configurações</h1><p class="muted">Organize contas, categorias e mantenha cópias dos dados.</p></div></div>
+        <div class="settings-grid">
+          <article class="panel">
+            <h3>Aplicativo</h3>
+            <p class="muted small">Instale o Nexus Finance na tela inicial para abrir como um app e usar offline.</p>
+            <div class="button-stack">
+              <button class="primary-button" id="install-app" hidden>Instalar aplicativo</button>
+              <span id="install-hint" class="muted small">No iPhone use <strong>Compartilhar → Adicionar à Tela de Início</strong>.</span>
+            </div>
+          </article>
+          <article class="panel">
+            <h3>Contas e saldos iniciais</h3>
+            <p class="muted small">O saldo inicial é somado aos lançamentos da conta.</p>
+            <div id="account-list" class="settings-list"></div>
+            <form id="account-form" class="stack-form">
+              <label>Nome<input id="account-name" required maxlength="40" placeholder="Ex.: Conta principal"></label>
+              <label>Saldo inicial<input id="account-opening" type="number" step="0.01" value="0" required></label>
+              <button class="primary-button" type="submit">Adicionar conta</button>
+            </form>
+          </article>
+          <article class="panel">
+            <h3>Categorias</h3>
+            <p class="muted small">Usadas nos lançamentos, orçamentos e nas cores do gráfico de despesas.</p>
+            <div id="category-list" class="settings-list"></div>
+            <form id="category-form" class="stack-form">
+              <label>Nome<input id="category-name" required maxlength="30" placeholder="Ex.: Pets"></label>
+              <label>Tipo<select id="category-kind"><option value="expense">Saída</option><option value="income">Entrada</option></select></label>
+              <label>Cor<input id="category-color" type="color" value="#e50914"></label>
+              <button class="primary-button" type="submit">Adicionar</button>
+            </form>
+          </article>
+          <article class="panel">
+            <h3>Excel e segurança</h3>
+            <p class="muted small">Use CSV para editar lançamentos no Excel. O backup JSON preserva todas as configurações.</p>
+            <div class="button-stack">
+              <button class="secondary-button" id="csv-template">Baixar modelo CSV</button>
+              <button class="secondary-button" id="csv-export">Exportar lançamentos CSV</button>
+              <button class="secondary-button" id="csv-import">Importar CSV do Excel</button>
+              <button class="secondary-button" id="backup-export">Baixar backup completo</button>
+              <button class="secondary-button" id="backup-import">Restaurar backup</button>
+            </div>
+            <input id="csv-file" type="file" accept=".csv,text/csv" hidden>
+            <input id="backup-file" type="file" accept=".json,application/json" hidden>
+            <p id="file-status" class="status" aria-live="polite"></p>
+          </article>
+          <article class="panel danger">
+            <h3>Zona de cuidado</h3>
+            <p class="muted small">Remove apenas os dados deste aplicativo neste navegador.</p>
+            <button class="danger-button" id="reset-app">Apagar dados do Nexus Finance</button>
+          </article>
+        </div>
+      </section>
     </main>
   </div>
 
-  <dialog id="transaction-modal"><form id="transaction-form" method="dialog"><div class="modal-head"><div><p class="eyebrow">MOVIMENTAÇÃO</p><h2>Novo lançamento</h2></div><button class="icon-button" value="cancel" formnovalidate aria-label="Fechar">×</button></div><div class="form-grid"><label class="span-2">Descrição<input id="tx-description" required maxlength="80"></label><label>Valor<input id="tx-amount" type="number" min="0.01" step="0.01" required></label><label>Data<input id="tx-date" type="date" required></label><label>Tipo<select id="tx-type"><option value="expense">Saída</option><option value="income">Entrada</option><option value="goal">Guardar em meta</option></select></label><label>Categoria / meta<select id="tx-category" required></select></label><label class="span-2">Conta<select id="tx-account" required></select></label><label class="span-2">Observações<textarea id="tx-notes" rows="2" maxlength="180"></textarea></label></div><button class="primary-button full" type="submit">Salvar lançamento</button></form></dialog>
-  <dialog id="bill-modal"><form id="bill-form" method="dialog"><div class="modal-head"><h2>Nova conta fixa</h2><button class="icon-button" value="cancel" formnovalidate>×</button></div><div class="form-grid"><label class="span-2">Descrição<input id="bill-name" required></label><label>Valor previsto<input id="bill-amount" type="number" min="0.01" step="0.01" required></label><label>Vencimento<input id="bill-day" type="number" min="1" max="31" required></label><label>Categoria<input id="bill-category" required></label><label>Conta<select id="bill-account" required></select></label></div><button class="primary-button full" type="submit">Adicionar</button></form></dialog>
-  <dialog id="budget-modal"><form id="budget-form" method="dialog"><div class="modal-head"><h2>Novo orçamento</h2><button class="icon-button" value="cancel" formnovalidate>×</button></div><label>Categoria<input id="budget-name" required></label><label>Limite mensal<input id="budget-limit" type="number" min="0.01" step="0.01" required></label><button class="primary-button full" type="submit">Criar</button></form></dialog>
-  <dialog id="goal-modal"><form id="goal-form" method="dialog"><div class="modal-head"><h2>Nova meta</h2><button class="icon-button" value="cancel" formnovalidate>×</button></div><label>Nome<input id="goal-name" required></label><label>Valor objetivo<input id="goal-target" type="number" min="0.01" step="0.01" required></label><button class="primary-button full" type="submit">Criar</button></form></dialog>
-  <dialog id="payment-modal"><form id="payment-form" method="dialog"><div class="modal-head"><h2>Registrar pagamento</h2><button class="icon-button" value="cancel" formnovalidate>×</button></div><input id="payment-bill-id" type="hidden"><label>Valor pago<input id="payment-amount" type="number" min="0.01" step="0.01" required></label><label>Data<input id="payment-date" type="date" required></label><label>Conta<select id="payment-account" required></select></label><button class="primary-button full" type="submit">Confirmar pagamento</button></form></dialog>
+  <nav class="tabbar" aria-label="Navegação">
+    <button class="tab active" data-section="dashboard"><span aria-hidden="true">⌂</span>Visão</button>
+    <button class="tab" data-section="bills"><span aria-hidden="true">✓</span>Contas</button>
+    <button class="tab" data-section="recurring"><span aria-hidden="true">↻</span>Recor.</button>
+    <button class="tab" data-section="budgets"><span aria-hidden="true">◔</span>Orçam.</button>
+    <button class="tab" data-section="goals"><span aria-hidden="true">◎</span>Metas</button>
+    <button class="tab" data-section="history"><span aria-hidden="true">≡</span>Lançam.</button>
+    <button class="tab" data-section="settings"><span aria-hidden="true">⚙</span>Config.</button>
+  </nav>
+  <button class="fab" data-open="transaction-modal" aria-label="Novo lançamento">+</button>
+
+  <dialog id="transaction-modal"><form id="transaction-form" method="dialog">
+    <div class="modal-head"><div><p class="eyebrow">MOVIMENTAÇÃO</p><h2 id="tx-modal-title">Novo lançamento</h2></div><button class="icon-button" value="cancel" formnovalidate aria-label="Fechar">×</button></div>
+    <div class="form-grid">
+      <label class="span-2">Descrição<input id="tx-description" required maxlength="80"></label>
+      <label>Valor<input id="tx-amount" type="number" min="0.01" step="0.01" required></label>
+      <label>Data<input id="tx-date" type="date" required></label>
+      <label>Tipo<select id="tx-type"><option value="expense">Saída</option><option value="income">Entrada</option><option value="goal">Guardar em meta</option><option value="goal-withdraw">Resgatar de meta</option><option value="transfer">Transferência entre contas</option></select></label>
+      <label id="tx-category-field">Categoria / meta<select id="tx-category" required></select></label>
+      <label class="span-2" id="tx-account-field">Conta<select id="tx-account" required></select></label>
+      <label class="span-2" id="tx-to-account-field" hidden>Para a conta<select id="tx-to-account"></select></label>
+      <label class="span-2">Observações<textarea id="tx-notes" rows="2" maxlength="180"></textarea></label>
+    </div>
+    <button class="primary-button full" type="submit">Salvar lançamento</button>
+  </form></dialog>
+
+  <dialog id="bill-modal"><form id="bill-form" method="dialog">
+    <div class="modal-head"><h2 id="bill-modal-title">Nova conta fixa</h2><button class="icon-button" value="cancel" formnovalidate aria-label="Fechar">×</button></div>
+    <div class="form-grid">
+      <label class="span-2">Descrição<input id="bill-name" required></label>
+      <label>Valor previsto<input id="bill-amount" type="number" min="0.01" step="0.01" required></label>
+      <label>Vencimento<input id="bill-day" type="number" min="1" max="31" required></label>
+      <label>Categoria<input id="bill-category" required list="category-options"></label>
+      <label>Conta<select id="bill-account" required></select></label>
+    </div>
+    <button class="primary-button full" type="submit">Salvar</button>
+  </form></dialog>
+
+  <dialog id="recurring-modal"><form id="recurring-form" method="dialog">
+    <div class="modal-head"><h2 id="recurring-modal-title">Novo recorrente</h2><button class="icon-button" value="cancel" formnovalidate aria-label="Fechar">×</button></div>
+    <div class="form-grid">
+      <label class="span-2">Descrição<input id="recurring-name" required maxlength="80"></label>
+      <label>Valor<input id="recurring-amount" type="number" min="0.01" step="0.01" required></label>
+      <label>Dia do mês<input id="recurring-day" type="number" min="1" max="31" required value="1"></label>
+      <label>Tipo<select id="recurring-type"><option value="expense">Saída</option><option value="income">Entrada</option></select></label>
+      <label>Categoria<input id="recurring-category" required list="category-options"></label>
+      <label>Conta<select id="recurring-account" required></select></label>
+      <label>A partir de<input id="recurring-start" type="month" required></label>
+    </div>
+    <button class="primary-button full" type="submit">Salvar</button>
+  </form></dialog>
+
+  <dialog id="budget-modal"><form id="budget-form" method="dialog">
+    <div class="modal-head"><h2 id="budget-modal-title">Novo orçamento</h2><button class="icon-button" value="cancel" formnovalidate aria-label="Fechar">×</button></div>
+    <label>Categoria<input id="budget-name" required list="category-options"></label>
+    <label>Limite mensal<input id="budget-limit" type="number" min="0.01" step="0.01" required></label>
+    <button class="primary-button full" type="submit">Salvar</button>
+  </form></dialog>
+
+  <dialog id="goal-modal"><form id="goal-form" method="dialog">
+    <div class="modal-head"><h2 id="goal-modal-title">Nova meta</h2><button class="icon-button" value="cancel" formnovalidate aria-label="Fechar">×</button></div>
+    <label>Nome<input id="goal-name" required></label>
+    <label>Valor objetivo<input id="goal-target" type="number" min="0.01" step="0.01" required></label>
+    <button class="primary-button full" type="submit">Salvar</button>
+  </form></dialog>
+
+  <dialog id="payment-modal"><form id="payment-form" method="dialog">
+    <div class="modal-head"><h2>Registrar pagamento</h2><button class="icon-button" value="cancel" formnovalidate aria-label="Fechar">×</button></div>
+    <input id="payment-bill-id" type="hidden">
+    <label>Valor pago<input id="payment-amount" type="number" min="0.01" step="0.01" required></label>
+    <label>Data<input id="payment-date" type="date" required></label>
+    <label>Conta<select id="payment-account" required></select></label>
+    <button class="primary-button full" type="submit">Confirmar pagamento</button>
+  </form></dialog>
+
+  <datalist id="category-options"></datalist>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <div id="report" class="report" aria-hidden="true"></div>
 </body>
 </html>

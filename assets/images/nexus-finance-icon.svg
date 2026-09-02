@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Nexus Finance">
+  <rect width="512" height="512" rx="116" fill="#0b0b0b"/>
+  <rect x="92" y="92" width="328" height="328" rx="76" fill="#e50914"/>
+  <path d="M170 362V150h36l100 140V150h36v212h-36L206 222v140z" fill="#ffffff"/>
+</svg>

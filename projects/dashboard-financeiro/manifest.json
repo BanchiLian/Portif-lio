@@ -1,0 +1,23 @@
+{
+  "name": "Nexus Finance",
+  "short_name": "Nexus",
+  "id": "./",
+  "start_url": "./index.html",
+  "scope": "./",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#090909",
+  "theme_color": "#090909",
+  "description": "Painel financeiro pessoal: contas, contas fixas, orçamentos, metas, lançamentos recorrentes e relatórios — tudo salvo no navegador e com uso offline.",
+  "categories": ["finance", "productivity"],
+  "icons": [
+    {
+      "src": "../../assets/images/nexus-finance-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
